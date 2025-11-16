@@ -1,0 +1,75 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;  /* 스크롤을 숨깁니다 */
+}
+
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 예시: 16:9 비율을 가진 화면 */
+.kiosk-container {
+  width: 100vw;   /* 화면 너비의 100% */
+  height: 56.25vw; /* 16:9 비율을 유지하려면 높이는 너비의 56.25% */
+  max-width: 1920px; /* 최대 너비 */
+  max-height: 1080px; /* 최대 높이 */
+  margin: 0 auto; /* 화면 가운데 배치 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+/* 예시: 1920x1080 해상도에서 고정 */
+@media (min-width: 1920px) {
+  .kiosk-container {
+    width: 1920px;
+    height: 1080px;
+  }
+}
+
+/* 예시: 1280x720 해상도에서 고정 */
+@media (max-width: 1280px) {
+  .kiosk-container {
+    width: 1280px;
+    height: 720px;
+  }
+}
+
