@@ -1,8 +1,16 @@
 import { Link } from "react-router-dom";
+import '../styles/App.css';
 
 const Nav = () => {
+  // 개발 모드에서만 네비게이션 표시
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  if (!isDevelopment) {
+    return null;
+  }
+
   return (
-    <nav className="flex gap-4 p-4 bg-gray-200">
+    <nav className="dev-nav">
       <Link to="/kiosk">Kiosk</Link>
       <Link to="/ordering">Ordering</Link>
       <Link to="/discount">Discount</Link>
