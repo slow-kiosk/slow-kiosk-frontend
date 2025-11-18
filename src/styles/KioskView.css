@@ -8,12 +8,6 @@
   align-items: center;
   justify-content: center;
 
-  background: linear-gradient(
-    135deg,
-    var(--bun-brown) 0%,
-    var(--cheese-yellow) 100%
-  );
-
   padding: 40px;
 }
 
@@ -102,7 +96,7 @@
   border-radius: 50px;
   cursor: pointer;
 
-  box-shadow: 0 6px 20px rgba(230, 57, 70, 0.4);
+  box-shadow: 0 6px 20px rgba(85, 76, 76, 0.4);
   transition: all 0.3s ease;
 }
 

@@ -5,6 +5,7 @@ import { useOrder } from '../contexts/OrderContext';
 import speechService from '../services/SpeechService';
 import '../styles/PaymentView.css';
 
+// 결제 수단 - 기프티콘 추가 / 카드 결제 선택 시 카드를 꽂아주세요 라는 멘트가 나오도록
 const PaymentView = () => {
   const navigate = useNavigate();
   const { finalPrice, clearOrder, setStage, setListening, setTranscript } = useOrder();
@@ -22,21 +23,23 @@ const PaymentView = () => {
       if (!text) return;
 
       // 결제 수단 선택
-      if (text.includes('카드') || text.includes('신용카드')) {
+      if (text.includes('카드') || text.includes('신용카드')) { // 카드
         handlePaymentMethodSelect('card');
-      } else if (text.includes('모바일') || text.includes('스마트폰')) {
+      } else if (text.includes('모바일 삼성 / LG 페이') || text.includes('스마트폰')) { // 모바일 삼성 / LG 페이
         handlePaymentMethodSelect('mobile');
+      } else if (text.includes('기프티콘')) { // 기프티콘
+        handlePaymentMethodSelect('giftcard');
       } 
       // 결제하기
       else if (text.includes('결제') && paymentMethod) {
-        handlePaymentComplete();
+        handlePaymentMethodAdded();
       } 
       // 해당되지 않을 때
       else {
         const message = {
           role: 'assistant',
-          content: '결제 방법을 선택해주세요. 카드, 모바일 중 하나를 말씀해주세요.',
-          suggestions: ['카드 결제', '모바일 결제']
+          content: '결제 방법 음성으로 알려주세요.',
+          suggestions: ['카드 결제', '모바일 결제', '기프티콘 결제']
         };
         speechService.speak(message.content);
       }
@@ -52,7 +55,8 @@ const PaymentView = () => {
 
     const methodNames = {
       card: '카드',
-      mobile: '모바일'
+      mobile: '모바일',
+      giftcard: '기프티콘'
     };
 
     const message = {
@@ -64,7 +68,7 @@ const PaymentView = () => {
   };
 
   // 결제 완료 처리
-  const handlePaymentComplete = () => {
+  const handlePaymentMethodAdded = () => { // 결제 수단 등록 완료 시 주문 진행 페이지로 이동
     setIsProcessing(true);
 
     setTimeout(() => {
@@ -75,7 +79,7 @@ const PaymentView = () => {
 
       setTimeout(() => {
         clearOrder();
-        navigate('/kiosk');
+        navigate('/ordering');
       }, 5000);
     }, 2000);
   };
@@ -135,16 +139,25 @@ const PaymentView = () => {
                 <div className="method-icon">📱</div>
                 <div className="method-name">모바일</div>
               </button>
+
+              <button
+                className={`method-button ${paymentMethod === 'giftcard' ? 'selected' : ''}`}
+                onClick={() => handlePaymentMethodSelect('giftcard')}
+                disabled={isCompleted}
+              >
+                <div className="method-icon">🎁</div>
+                <div className="method-name">기프티콘</div>
+              </button>
             </div>
           </div>
 
           {paymentMethod && !isCompleted && (
             <button
               className="complete-payment-button"
-              onClick={handlePaymentComplete}
+              onClick={handlePaymentMethodAdded}
               disabled={isProcessing}
             >
-              결제하기
+              결제 수단 등록하기
             </button>
           )}
         </div>
