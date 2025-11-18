@@ -48,8 +48,8 @@ body, html {
 .kiosk-container {
   width: 100vw;   /* 화면 너비의 100% */
   height: 56.25vw; /* 16:9 비율을 유지하려면 높이는 너비의 56.25% */
-  max-width: 1920px; /* 최대 너비 */
-  max-height: 1080px; /* 최대 높이 */
+  max-width: 1080px; /* 최대 너비 */
+  max-height: 1920px; /* 최대 높이 */
   margin: 0 auto; /* 화면 가운데 배치 */
   display: flex;
   justify-content: center;
@@ -60,16 +60,16 @@ body, html {
 /* 예시: 1920x1080 해상도에서 고정 */
 @media (min-width: 1920px) {
   .kiosk-container {
-    width: 1920px;
-    height: 1080px;
+    width: 1080px;
+    height: 1920px;
   }
 }
 
 /* 예시: 1280x720 해상도에서 고정 */
 @media (max-width: 1280px) {
   .kiosk-container {
-    width: 1280px;
-    height: 720px;
+    width: 720px;
+    height: 1280px;
   }
 }
 

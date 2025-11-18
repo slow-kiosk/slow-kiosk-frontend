@@ -35,8 +35,6 @@ OrderContext.js
 ChatBubble.css
 MenuVisualization.css
 DiscountView.css
-OrderingView.css
-OrderListView.css
 
 # /src/data
 menus.js
@@ -48,10 +46,5 @@ ChatbotService.js
 
 # /src/pages
 DiscountView.js
-OrderingView.js
-# PaymentView.js
 
 User-Diagram.md
-
-
-
