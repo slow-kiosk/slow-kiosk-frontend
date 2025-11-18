@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useOrder } from '../contexts/OrderContext';
 import speechService from '../services/SpeechService';
 import '../styles/KioskView.css';
+import '../components/Text.css';
+import '../components/Button.css';
 
 const KioskView = () => {
   const navigate = useNavigate();

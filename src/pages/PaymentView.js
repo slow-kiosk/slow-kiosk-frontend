@@ -1,11 +1,14 @@
-// 결제 화면
+// 결제 수단 선택 페이지
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrder } from '../contexts/OrderContext';
 import speechService from '../services/SpeechService';
 import '../styles/PaymentView.css';
+import '../components/Text.css';
+import '../components/Button.css';
 
-// 결제 수단 - 기프티콘 추가 / 카드 결제 선택 시 카드를 꽂아주세요 라는 멘트가 나오도록
+// 카드 결제 선택 시 카드를 꽂아주세요 라는 멘트가 나오도록
+// 결제 수단 등록 시 너무 로딩이 길다
 const PaymentView = () => {
   const navigate = useNavigate();
   const { finalPrice, clearOrder, setStage, setListening, setTranscript } = useOrder();

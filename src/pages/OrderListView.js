@@ -2,9 +2,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MenuVisualization from '../components/MenuVisualization';
-import { useOrder } from '../hooks/useOrder';
-import { allMenus, findMenuByName } from '../utils/menuUtils';
+import { useOrder } from '../contexts/OrderContext';
+import { findMenuByName, allMenus } from '../data/menus';
 import '../styles/OrderListView.css';
+import '../components/Text.css';
+import '../components/Button.css';
 
 const OrderListView = () => {
   const navigate = useNavigate();
@@ -65,7 +67,7 @@ const OrderListView = () => {
   };
 
   const handleCompleteOrder = () => {
-    navigate('/discount');
+    navigate('/ordering');
   };
 
   return (
@@ -90,7 +92,7 @@ const OrderListView = () => {
             onClick={handleCompleteOrder}
             disabled={orderItems.length === 0}
           >
-            주문 확인
+            주문 내역 확인 완료
           </button>
         </div>
       </div>

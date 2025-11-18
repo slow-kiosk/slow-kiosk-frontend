@@ -23,24 +23,6 @@
   margin-bottom: 60px;
 }
 
-
-/* 타이틀 텍스트 */
-.main-title {
-  font-size: 72px;
-  font-weight: bold;
-  color: var(--text-dark);
-  margin-bottom: 20px;
-
-  text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.3);
-}
-
-.subtitle {
-  font-size: 32px;
-  color: var(--patty-brown);
-  font-weight: 400;
-}
-
-
 /* 기능 카드 */
 .features-section {
   display: flex;
@@ -82,32 +64,6 @@
   font-size: 20px;
   color: var(--text-dark);
   line-height: 1.6;
-}
-
-/* 시작 버튼 */
-.start-button {
-  background: var(--tomato-red);
-  color: var(--text-light);
-
-  border: none;
-  padding: 25px 80px;
-  font-size: 36px;
-  font-weight: bold;
-  border-radius: 50px;
-  cursor: pointer;
-
-  box-shadow: 0 6px 20px rgba(85, 76, 76, 0.4);
-  transition: all 0.3s ease;
-}
-
-.start-button:hover {
-  background: #d62839;
-  transform: scale(1.05);
-  box-shadow: 0 8px 25px rgba(230, 57, 70, 0.5);
-}
-
-.start-button:active {
-  transform: scale(0.98);
 }
 
 

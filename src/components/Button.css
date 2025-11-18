@@ -1,0 +1,26 @@
+/* 시작 버튼 */
+.start-button, .older-list-button, .order-complete-button {
+  background: var(--tomato-red);
+  color: var(--text-light);
+
+  border: none;
+  padding: 25px 80px;
+  font-size: 36px;
+  font-weight: bold;
+  border-radius: 50px;
+  cursor: pointer;
+
+  box-shadow: 0 6px 20px rgba(85, 76, 76, 0.4);
+  transition: all 0.3s ease;
+}
+
+.start-button:hover, .older-list-button, .order-complete-button {
+  background: #d62839;
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(230, 57, 70, 0.5);
+}
+
+.start-button:active, .older-list-button, .order-complete-button {
+  transform: scale(0.98);
+}
+  

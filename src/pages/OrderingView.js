@@ -7,10 +7,13 @@ import chatbotService from '../services/ChatbotService';
 import { findMenuByName, allMenus } from '../data/menus';
 import ChatBubble from '../components/ChatBubble';
 import '../styles/OrderingView.css';
+import '../components/Text.css';
+import '../components/Button.css';
 
 // 주문 내역 확인 버튼 만들어서 주문 내역 확인 페이지로 이동하도록
 // 주문 완료 버튼 필요
 // 주문 시 상품 이미지 출력
+// 결제 방법 선택 전 포장, 매장 선택 가능하게끔
 const OrderingView = () => {
   const navigate = useNavigate();
   const {
@@ -27,6 +30,16 @@ const OrderingView = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const chatEndRef = useRef(null);
   const hasInitialized = useRef(false);
+
+  const handleOrderList = () => { // 주문 내역 확인
+    setStage('order-list');
+    navigate('/order-list');
+  };
+
+  // const handleCompleteOrder = () => { // 주문 완료 - 결제 페이지로 이동
+  //   setStage('kiosk');
+  //   navigate('/kiosk');
+  // };
 
   const handleVoiceInput = useCallback(async (text) => {
     if (isProcessing || !text.trim()) return;
@@ -188,6 +201,21 @@ const OrderingView = () => {
                 </div>
               )}
             </div>
+
+            <button 
+              className="older-list-button"
+              onClick={handleOrderList}
+            >
+              주문 내역
+            </button>
+
+            {/* 주문 완료 버튼 클릭 후 결제 페이지로 이동 (모바일 QR) */}
+            <button 
+              className="order-complete-button"
+              onClick={handleCompleteOrder}
+            >
+              주문 완료
+            </button>
           </div>
         </div>
       </div>

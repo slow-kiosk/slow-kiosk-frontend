@@ -6,6 +6,7 @@ import { OrderProvider } from './contexts/OrderContext';
 import Nav from "./components/Nav";
 import KioskView from "./pages/KioskView";
 import OrderingView from "./pages/OrderingView";
+import OrderListView from "./pages/OrderListView";
 import DiscountView from "./pages/DiscountView";
 import PaymentView from "./pages/PaymentView";
 
@@ -31,6 +32,7 @@ function App() {
             <Route path="/" element={<KioskView />} />
             <Route path="/kiosk" element={<KioskView />} />
             <Route path="/ordering" element={<OrderingView />} />
+            <Route path="/order-list" element={<OrderListView />} />
             <Route path="/discount" element={<DiscountView />} />
             <Route path="/payment" element={<PaymentView />} />
           </Routes>

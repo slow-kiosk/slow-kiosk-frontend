@@ -1,0 +1,14 @@
+/* 타이틀 텍스트 */
+.main-title {
+  font-size: 72px;
+  font-weight: bold;
+  color: var(--text-dark);
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+.subtitle {
+  font-size: 32px;
+  color: var(--patty-brown);
+  font-weight: 400;
+}
