@@ -15,9 +15,9 @@ const KioskView = () => {
     setStage('kiosk');
   }, [clearOrder, setStage]);
 
-  const handleStartOrder = () => {
-    setStage('ordering');
-    navigate('/ordering');
+  const handlePayment = () => {
+    setStage('payment');
+    navigate('/payment');
   };
 
   return (
@@ -43,7 +43,7 @@ const KioskView = () => {
 
         <button 
           className="start-button"
-          onClick={handleStartOrder}
+          onClick={handlePayment}
         >
           주문 시작하기
         </button>
@@ -60,3 +60,5 @@ const KioskView = () => {
 };
 
 export default KioskView;
+
+// 주문 내역 확인 창 필요
