@@ -68,7 +68,7 @@ body, html {
 /* 예시: 1280x720 해상도에서 고정 */
 @media (max-width: 1280px) {
   .kiosk-container {
-    width: 720px;
+    /* width: 720px; */
     height: 1280px;
   }
 }

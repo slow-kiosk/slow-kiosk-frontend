@@ -36,7 +36,6 @@ ChatBubble.css
 MenuVisualization.css
 
 # /src/data
-menus.js
 
 # /src/services
 Api.js
