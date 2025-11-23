@@ -1,7 +1,7 @@
-.start-button, .older-list-button, .order-complete-button, .proceed-button {
+.start-button, .proceed-button, .back-to-ordering-button {
   background: var(--tomato-red);
   color: var(--text-light);
-  width: 100%;
+  width: 60%;
   border: none;
   padding: 25px 80px;
   font-size: 36px;
@@ -11,14 +11,15 @@
   margin-top: 30px;
   box-shadow: 0 6px 20px rgba(85, 76, 76, 0.4);
   transition: all 0.3s ease;
+  justify-content: center;
 }
 
-.start-button:hover, .older-list-button, .order-complete-button, .proceed-button {
-  background: #1976d2;
+.start-button:hover, .proceed-button:hover, .back-to-ordering-button:hover {
+  background: #d32f2f;
   transform: scale(1.05);
-  /* box-shadow: 0 8px 25px rgba(57, 80, 230, 0.5); */
+  box-shadow: 0 8px 25px rgba(230, 57, 70, 0.5);
 }
 
-.start-button:active, .older-list-button, .order-complete-button, .proceed-button {
+.start-button:active, .proceed-button:active, .back-to-ordering-button:active {
   transform: scale(0.98);
 }

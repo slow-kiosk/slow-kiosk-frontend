@@ -6,6 +6,8 @@ import speechService from '../services/SpeechService';
 import '../styles/CheckoutView.css';
 import '../components/Button.css';
 
+// 결제 완료 이후 로직 추가 필요
+
 const CheckoutView = () => {
   const navigate = useNavigate();
   const {
@@ -18,7 +20,6 @@ const CheckoutView = () => {
     applyDiscount,
     setStage,
     addChatMessage,
-    chatHistory,
     setListening,
     setTranscript
   } = useOrder();
@@ -165,7 +166,7 @@ const CheckoutView = () => {
     handleVoiceInput(suggestion);
   };
 
-  const handleProceed = () => {
+  const handleProceed = () => { // 결제하기 버튼 클릭 시 결제 진행중이라는 로딩 진행 이후 결제 완료 주문이 완료되었습니다와 함께 번호표 발급 안내 필요
     navigate('/payment');
   };
 

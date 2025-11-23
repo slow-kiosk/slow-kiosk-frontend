@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useOrder } from '../contexts/OrderContext';
 import speechService from '../services/SpeechService';
 import chatbotService from '../services/ChatbotService';
-import { findMenuByName, allMenus } from '../data/menus';
+import { findMenuByName, fetchMenus } from '../data/menus';
 import ChatBubble from '../components/ChatBubble';
 import '../styles/OrderingView.css';
 import '../components/Text.css';
@@ -28,6 +28,10 @@ const OrderingView = () => {
   } = useOrder();
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const [menus, setMenus] = useState([]);
+  const [loadingMenus, setLoadingMenus] = useState(true);
+  const [imageLoadingStates, setImageLoadingStates] = useState({});
+  const [imageErrorStates, setImageErrorStates] = useState({});
   const chatEndRef = useRef(null);
   const hasInitialized = useRef(false);
 
@@ -35,11 +39,6 @@ const OrderingView = () => {
     setStage('order-list');
     navigate('/order-list');
   };
-
-  // const handleCompleteOrder = () => { // 주문 완료 - 결제 페이지로 이동
-  //   setStage('kiosk');
-  //   navigate('/kiosk');
-  // };
 
   const handleVoiceInput = useCallback(async (text) => {
     if (isProcessing || !text.trim()) return;
@@ -57,12 +56,12 @@ const OrderingView = () => {
     try {
       const response = await chatbotService.sendMessage(text, {
         currentOrder: orderItems,
-        availableMenus: allMenus,
+        availableMenus: menus,
         stage: 'ordering'
       });
 
       // 메뉴 이름 추출 시도
-      const menu = findMenuByName(text);
+      const menu = findMenuByName(menus, text);
       if (menu) {
         addItem({
           ...menu,
@@ -72,7 +71,7 @@ const OrderingView = () => {
         const confirmMessage = {
           role: 'assistant',
           content: `${menu.name}를 주문 목록에 추가했습니다. 추가로 주문하시겠습니까?`,
-          suggestions: ['더 주문하기', '주문 완료', '주문 확인']
+          suggestions: ['더 주문하기', '주문 완료', '주문 내역']
         };
         addChatMessage(confirmMessage);
         speechService.speak(confirmMessage.content);
@@ -88,7 +87,22 @@ const OrderingView = () => {
     } finally {
       setIsProcessing(false);
     }
-  }, [isProcessing, orderItems, addItem, addChatMessage, navigate]);
+  }, [isProcessing, orderItems, menus, addItem, addChatMessage, navigate]);
+
+  // 메뉴 데이터 가져오기
+  useEffect(() => {
+    const loadMenus = async () => {
+      try {
+        const menuData = await fetchMenus();
+        setMenus(menuData);
+      } catch (error) {
+        console.error('메뉴 로딩 실패:', error);
+      } finally {
+        setLoadingMenus(false);
+      }
+    };
+    loadMenus();
+  }, []);
 
   useEffect(() => {
     setStage('ordering');
@@ -165,6 +179,35 @@ const OrderingView = () => {
     addChatMessage(message);
   };
 
+  const handleMenuClick = (menu) => {
+    addItem({
+      ...menu,
+      quantity: 1
+    });
+    
+    const confirmMessage = {
+      role: 'assistant',
+      content: `${menu.name}를 주문 목록에 추가했습니다. 추가로 주문하시겠습니까?`,
+      suggestions: ['더 주문하기', '주문 완료', '주문 내역']
+    };
+    addChatMessage(confirmMessage);
+    speechService.speak(confirmMessage.content);
+  };
+
+  const handleImageLoad = (menuId) => {
+    setImageLoadingStates(prev => ({ ...prev, [menuId]: false }));
+  };
+
+  const handleImageError = (menuId) => {
+    setImageLoadingStates(prev => ({ ...prev, [menuId]: false }));
+    setImageErrorStates(prev => ({ ...prev, [menuId]: true }));
+  };
+
+  const handleImageLoadStart = (menuId) => {
+    setImageLoadingStates(prev => ({ ...prev, [menuId]: true }));
+    setImageErrorStates(prev => ({ ...prev, [menuId]: false }));
+  };
+
   return (
     <div className="ordering-view">
       <div className="ordering-container">
@@ -202,20 +245,86 @@ const OrderingView = () => {
               )}
             </div>
 
-            <button 
-              className="older-list-button"
-              onClick={handleOrderList}
-            >
-              주문 내역
-            </button>
+            <div className="button-group">
+              <button 
+                className="older-list-button"
+                onClick={handleOrderList}
+              >
+                주문 내역
+              </button>
 
-            {/* 주문 완료 버튼 클릭 후 결제 페이지로 이동 (모바일 QR) */}
-            <button 
-              className="order-complete-button"
-              onClick={handleCompleteOrder}
-            >
-              주문 완료
-            </button>
+              <button 
+                className="order-complete-button"
+                onClick={handleCompleteOrder}
+              >
+                주문 완료
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="ordering-right">
+          <div className="menu-board-section">
+            <h2 className="section-title">메뉴판</h2>
+            {loadingMenus ? (
+              <div className="menu-loading">
+                <div className="spinner"></div>
+                <span>메뉴를 불러오는 중...</span>
+              </div>
+            ) : (
+              <div className="menu-grid">
+                {menus.length === 0 ? (
+                  <div className="menu-empty-state">
+                    <p>메뉴를 불러올 수 없습니다.</p>
+                  </div>
+                ) : (
+                  menus.map((menu) => {
+                    const isLoading = imageLoadingStates[menu.id];
+                    const hasError = imageErrorStates[menu.id];
+                    const showPlaceholder = !menu.imageUrl || hasError;
+                    
+                    return (
+                      <div
+                        key={menu.id}
+                        className="menu-card"
+                        onClick={() => handleMenuClick(menu)}
+                      >
+                        <div className="menu-card-image">
+                          {showPlaceholder ? (
+                            <div className="menu-card-placeholder">🍽️</div>
+                          ) : (
+                            <>
+                              {isLoading && (
+                                <div className="menu-image-loading">
+                                  <div className="spinner"></div>
+                                </div>
+                              )}
+                              <img
+                                src={menu.imageUrl}
+                                alt={menu.name}
+                                onLoadStart={() => handleImageLoadStart(menu.id)}
+                                onLoad={() => handleImageLoad(menu.id)}
+                                onError={() => handleImageError(menu.id)}
+                                style={{ display: isLoading ? 'none' : 'block' }}
+                              />
+                            </>
+                          )}
+                        </div>
+                        <div className="menu-card-info">
+                          <h3 className="menu-card-name">{menu.name}</h3>
+                          {menu.description && (
+                            <p className="menu-card-description">{menu.description}</p>
+                          )}
+                          <div className="menu-card-price">
+                            {menu.price?.toLocaleString()}원
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
