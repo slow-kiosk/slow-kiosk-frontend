@@ -14,7 +14,7 @@ const Nav = () => {
       <Link to="/kiosk">Kiosk</Link>
       <Link to="/ordering">Ordering</Link>
       <Link to="/order-list">OrderListView</Link>
-      <Link to="/discount">Discount</Link>
+      <Link to="/checkout">Checkout</Link>
       <Link to="/payment">Payment</Link>
     </nav>
   );

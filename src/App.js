@@ -7,7 +7,7 @@ import Nav from "./components/Nav";
 import KioskView from "./pages/KioskView";
 import OrderingView from "./pages/OrderingView";
 import OrderListView from "./pages/OrderListView";
-import DiscountView from "./pages/DiscountView";
+import CheckoutView from "./pages/CheckoutView";
 import PaymentView from "./pages/PaymentView";
 
 function App() {
@@ -33,7 +33,7 @@ function App() {
             <Route path="/kiosk" element={<KioskView />} />
             <Route path="/ordering" element={<OrderingView />} />
             <Route path="/order-list" element={<OrderListView />} />
-            <Route path="/discount" element={<DiscountView />} />
+            <Route path="/checkout" element={<CheckoutView />} />
             <Route path="/payment" element={<PaymentView />} />
           </Routes>
         </div>

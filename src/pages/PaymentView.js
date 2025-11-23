@@ -120,7 +120,6 @@ const PaymentView = () => {
   return (
     <div className="payment-view">
       <div className="payment-container">
-        <div className="payment-right">
           <h2 className="section-title">결제 방법 선택</h2>
 
           <div className="payment-methods">
@@ -163,7 +162,6 @@ const PaymentView = () => {
               결제 수단 등록하기
             </button>
           )}
-        </div>
       </div>
     </div>
   );

@@ -8,7 +8,7 @@ import { findMenuByName, allMenus } from '../data/menus';
 import ChatBubble from '../components/ChatBubble';
 import '../styles/OrderingView.css';
 import '../components/Text.css';
-import '../components/Button.css';
+import '../components/Button.css'; 
 
 // 주문 내역 확인 버튼 만들어서 주문 내역 확인 페이지로 이동하도록
 // 주문 완료 버튼 필요
@@ -80,8 +80,8 @@ const OrderingView = () => {
         // 액션 처리
         if (response.action === 'proceed_to_payment') {
           setTimeout(() => {
-            navigate('/discount');
-          }, 2000);
+            navigate('/checkout');
+          }, 500);
         }
       }
     } catch (error) {
@@ -152,7 +152,7 @@ const OrderingView = () => {
       speechService.speak(message.content);
       return;
     }
-    navigate('/discount');
+    navigate('/checkout');
   };
 
   const handleRemoveItem = (index) => {

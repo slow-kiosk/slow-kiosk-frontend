@@ -34,7 +34,6 @@ OrderContext.js
 # /src/styles
 ChatBubble.css
 MenuVisualization.css
-DiscountView.css
 
 # /src/data
 menus.js
@@ -45,6 +44,5 @@ SpeechService.js
 ChatbotService.js
 
 # /src/pages
-DiscountView.js
 
 User-Diagram.md
