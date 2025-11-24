@@ -9,6 +9,149 @@
 
 .subtitle {
   font-size: 32px;
-  color: var(--patty-brown);
+  color: var(--text-secondary);
   font-weight: 400;
+}
+
+/* 섹션 타이틀 */
+.section-title {
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+/* PaymentView에서 사용하는 큰 섹션 타이틀 */
+.payment-header .section-title {
+  font-size: 42px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+/* OrderingView에서 사용하는 섹션 타이틀 */
+.ordering-left .chat-section > .section-title,
+.ordering-view .section-title {
+  font-size: 32px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border-light);
+}
+
+/* 금액 관련 텍스트 */
+.amount-label {
+  font-size: 20px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.5px;
+}
+
+.amount-value {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--text-light);
+  letter-spacing: -1px;
+}
+
+/* 메뉴 카드 텍스트 */
+.menu-card-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.menu-card-description {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.menu-card-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary-purple);
+  margin-top: auto;
+}
+
+/* 주문 아이템 텍스트 */
+.order-item-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.order-item-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+.item-name {
+  font-weight: 600;
+  flex: 1;
+}
+
+.item-quantity {
+  margin: 0 15px;
+  color: var(--text-secondary);
+}
+
+.item-price {
+  font-weight: bold;
+  color: var(--primary-purple);
+}
+
+/* 가격 관련 텍스트 */
+.order-total {
+  margin-top: 16px;
+  text-align: right;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.total-row {
+  font-size: 32px;
+  font-weight: bold;
+  color: var(--primary-purple);
+}
+
+.discount-row {
+  color: #4caf50;
+  font-weight: 600;
+}
+
+/* 결제 관련 텍스트 */
+.method-name {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+
+.method-button.selected .method-name {
+  color: var(--primary-purple);
+}
+
+.complete-message {
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+/* 폼 라벨 텍스트 */
+.input-group label {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
 }

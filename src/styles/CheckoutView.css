@@ -21,13 +21,6 @@
   overflow: hidden;
 }
 
-.section-title {
-  font-size: 36px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  color: #333;
-  text-align: center;
-}
 
 .order-items-list {
   flex: 1;
@@ -46,20 +39,6 @@
   font-size: 24px;
 }
 
-.item-name {
-  font-weight: 600;
-  flex: 1;
-}
-
-.item-quantity {
-  margin: 0 15px;
-  color: #666;
-}
-
-.item-price {
-  font-weight: bold;
-  color: #1976d2;
-}
 
 .price-breakdown {
   background: #f9f9f9;
@@ -79,18 +58,11 @@
   border-bottom: none;
 }
 
-.discount-row {
-  color: #4caf50;
-  font-weight: 600;
-}
 
 .total-row {
-  font-size: 32px;
-  font-weight: bold;
-  color: #1976d2;
   margin-top: 10px;
   padding-top: 20px;
-  border-top: 2px solid #1976d2;
+  border-top: 2px solid var(--primary-purple);
 }
 
 .chat-section {
@@ -128,7 +100,7 @@
   align-items: center;
   gap: 10px;
   padding: 15px;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 20px;
 }
 
@@ -159,11 +131,6 @@
   gap: 10px;
 }
 
-.input-group label {
-  font-size: 22px;
-  font-weight: 600;
-  color: #333;
-}
 
 .input-group form {
   display: flex;
@@ -181,24 +148,9 @@
 }
 
 .code-input:focus {
-  border-color: #1976d2;
+  border-color: var(--primary-purple);
 }
 
-.apply-button {
-  padding: 15px 30px;
-  background: #1976d2;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-size: 22px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.apply-button:hover {
-  background: #1565c0;
-}
 
 
 
