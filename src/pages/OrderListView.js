@@ -7,10 +7,8 @@ const OrderListView = () => {
   const navigate = useNavigate();
   const { orderItems, totalPrice, discount, finalPrice } = useOrder();
 
-  const [paymentMethod] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isCompleted] = useState(false);
-  const hasInitialized = useRef(false);
+  // const hasInitialized = useRef(false);
 
   // 주문 페이지로 돌아가기
   const handleBackToOrdering = () => {

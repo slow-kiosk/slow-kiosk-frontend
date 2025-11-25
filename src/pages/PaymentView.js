@@ -11,10 +11,15 @@ import '../components/Button.css';
 // 결제 수단 등록 시 너무 로딩이 길다
 const PaymentView = () => {
   const navigate = useNavigate();
-  const { finalPrice, clearOrder, setStage, setListening, setTranscript } = useOrder();
+  const {
+    setStage,
+    setListening,
+    setTranscript,
+    paymentMethod,
+    setPaymentMethod
+  } = useOrder();
 
   // 상태 정의
-  const [paymentMethod, setPaymentMethod] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
 
@@ -34,7 +39,7 @@ const PaymentView = () => {
       suggestions: ['결제하기', '취소']
     };
     speechService.speak(message.content);
-  }, []);
+  }, [setPaymentMethod]);
 
   // 결제 완료 처리
   const handlePaymentMethodAdded = useCallback(() => { // 결제 수단 등록 완료 시 주문 진행 페이지로 이동
@@ -44,14 +49,13 @@ const PaymentView = () => {
       setIsCompleted(true);
       setIsProcessing(false);
 
-      speechService.speak('결제 수단이 등록되었습니다.'); 
+      speechService.speak('결제 수단이 등록되었습니다. 결제 금액을 확인하는 화면으로 돌아갑니다.');
 
       setTimeout(() => {
-        clearOrder();
-        navigate('/ordering');
-      }, 5000);
+        navigate('/checkout');
+      }, 600);
     }, 2000);
-  }, [clearOrder, navigate]);
+  }, [navigate]);
 
   // 음성 명령 처리 함수
   const handleVoiceInput = useCallback(
@@ -61,7 +65,7 @@ const PaymentView = () => {
       // 결제 수단 선택
       if (text.includes('카드') || text.includes('신용카드')) { // 카드
         handlePaymentMethodSelect('card');
-      } else if (text.includes('모바일 삼성 / LG 페이') || text.includes('스마트폰')) { // 모바일 삼성 / LG 페이
+      } else if (text.includes('모바일 삼성 / LG 페이 / 애플페이') || text.includes('스마트폰')) { // 모바일 삼성 / LG 페이
         handlePaymentMethodSelect('mobile');
       } else if (text.includes('기프티콘')) { // 기프티콘
         handlePaymentMethodSelect('giftcard');
@@ -87,6 +91,7 @@ const PaymentView = () => {
 
   // 초기 음성 설정
   useEffect(() => {
+    setStage('payment');
 
     speechService.onResult((result) => {
       if (result.final) {
@@ -104,7 +109,7 @@ const PaymentView = () => {
       speechService.stop();
       setListening(false);
     };
-  }, [finalPrice, handleVoiceInput, setStage, setListening, setTranscript, navigate]);
+  }, [handleVoiceInput, setStage, setListening, setTranscript, navigate]);
 
   return (
     <div className="payment-view">
