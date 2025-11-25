@@ -1,16 +1,41 @@
 :root {
-/* 🍔 Hamburger Theme Color Palette */
 
---bun-brown: #d99a29;
---patty-brown: #6e361c;
---cheese-yellow: #f2c94c;
---lettuce-green: #4caf50;
---tomato-red: #e63946;
+/* Primary Colors - Purple Gradient */
+--primary-purple: #667eea;
+--primary-purple-dark: #764ba2;
+--primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 
+/* Secondary Colors - Pink/Red Gradient */
+--accent-pink: #f093fb;
+--accent-red: #f5576c;
+--accent-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+--accent-gradient-hover: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+
+/* Background Colors */
+--bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+--bg-selected: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+--bg-white: #ffffff;
+--bg-light: #f5f5f5;
+--bg-soft: #fafafa;
+
+/* Text Colors */
+--text-primary: #1a1a1a;
 --text-dark: #2b1b0e;
 --text-light: #ffffff;
+--text-secondary: #666;
+--text-muted: #888;
 
---bg-soft: #fff8e6;
+/* Border Colors */
+--border-light: #e0e0e0;
+--border-primary: #667eea;
 
+/* Button Colors */
+--button-primary: var(--primary-gradient);
+--button-primary-hover: #1565c0;
+--button-accent: var(--accent-gradient);
+--button-accent-hover: var(--accent-gradient-hover);
+--button-danger: #ff6b6b;
+--button-danger-hover: #ff5252;
+--button-disabled: #ccc;
 }
   

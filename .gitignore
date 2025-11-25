@@ -41,6 +41,7 @@ MenuVisualization.css
 Api.js
 SpeechService.js
 ChatbotService.js
+STT_TTS_Guide.md
 
 # /src/pages
 

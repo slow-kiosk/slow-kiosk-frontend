@@ -1,5 +1,7 @@
-.start-button, .proceed-button, .back-to-ordering-button {
-  background: var(--tomato-red);
+.start-button, 
+.proceed-button, 
+.back-to-ordering-button {
+  background: var(--accent-gradient);
   color: var(--text-light);
   width: 60%;
   border: none;
@@ -8,18 +10,265 @@
   font-weight: bold;
   border-radius: 50px;
   cursor: pointer;
-  margin-top: 30px;
-  box-shadow: 0 6px 20px rgba(85, 76, 76, 0.4);
-  transition: all 0.3s ease;
+  margin: 30px auto 0;
+  display: block;
+  box-shadow: 0 8px 25px rgba(245, 87, 108, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: -0.5px;
+}
+
+.start-button:hover, 
+.proceed-button:hover, 
+.back-to-ordering-button:hover {
+  background: var(--accent-gradient-hover);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 35px rgba(245, 87, 108, 0.5);
+}
+
+.start-button:active, 
+.proceed-button:active, 
+.back-to-ordering-button:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+
+
+/* Payment Method Buttons */
+.method-button {
+  flex: 1;
+  min-width: 200px;
+  max-width: 250px;
+  padding: 40px 30px;
+  background: var(--bg-white);
+  border: 3px solid var(--border-light);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  position: relative;
+  overflow: hidden;
+}
+
+.method-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.method-button:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.method-button:hover:not(:disabled) {
+  border-color: var(--primary-purple);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+}
+
+.method-button.selected {
+  border-color: var(--primary-purple);
+  background: var(--bg-selected);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.25);
+  transform: translateY(-2px);
+}
+
+.method-button.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  background: var(--primary-purple);
+  color: var(--text-light);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
   justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
 }
 
-.start-button:hover, .proceed-button:hover, .back-to-ordering-button:hover {
-  background: #d32f2f;
-  transform: scale(1.05);
-  box-shadow: 0 8px 25px rgba(230, 57, 70, 0.5);
+.method-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
-.start-button:active, .proceed-button:active, .back-to-ordering-button:active {
-  transform: scale(0.98);
+
+
+/* Complete Payment Button */
+.complete-payment-button {
+  background: var(--accent-gradient);
+  color: var(--text-light);
+  border: none;
+  padding: 28px 100px;
+  font-size: 32px;
+  font-weight: 700;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(245, 87, 108, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: -0.5px;
+  min-width: 300px;
+  display: block;
+  margin: 0 auto;
+}
+
+.complete-payment-button:hover:not(:disabled) {
+  background: var(--accent-gradient-hover);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 35px rgba(245, 87, 108, 0.5);
+}
+
+.complete-payment-button:active:not(:disabled) {
+  transform: translateY(-1px) scale(0.98);
+}
+
+.complete-payment-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Action Buttons (Ordering View) */
+.action-button {
+  flex: 1;
+  padding: 25px;
+  font-size: 28px;
+  font-weight: bold;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.remove-button {
+  background: var(--button-danger);
+  color: var(--text-light);
+}
+
+.remove-button:hover:not(:disabled) {
+  background: var(--button-danger-hover);
+  transform: scale(1.02);
+}
+
+.action-button:disabled {
+  background: var(--button-disabled);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+
+/* Service Buttons (Ordering View) */
+.service-button {
+  padding: 18px;
+  border-radius: 16px;
+  border: 2px solid transparent;
+  background: var(--bg-light);
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+}
+
+.service-button.selected {
+  background: var(--bg-selected);
+  border-color: var(--primary-purple);
+  color: var(--primary-purple);
+  box-shadow: 0 8px 18px rgba(102, 126, 234, 0.2);
+}
+
+.service-button:hover:not(.selected) {
+  background: #eeeeee;
+}
+
+
+/* Order List & Complete Buttons */
+.older-list-button,
+.order-complete-button {
+  width: 100%;
+  padding: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.older-list-button {
+  background: var(--primary-gradient);
+  color: var(--text-light);
+}
+
+.older-list-button:hover {
+  background: var(--button-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
+}
+
+.order-complete-button {
+  background: var(--accent-gradient);
+  color: var(--text-light);
+}
+
+.order-complete-button:hover {
+  background: var(--accent-gradient-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(245, 87, 108, 0.3);
+}
+
+.older-list-button:active,
+.order-complete-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+
+/* Remove Item Button */
+.remove-item-button {
+  border: none;
+  background: #ffe5e5;
+  color: var(--button-danger);
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.remove-item-button:hover {
+  background: #ffcdd2;
+  transform: translateY(-1px);
+}
+
+
+/* Apply Button (Checkout & Order List) */
+.apply-button {
+  padding: 15px 30px;
+  background: var(--primary-gradient);
+  color: var(--text-light);
+  border: none;
+  border-radius: 10px;
+  font-size: 22px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.apply-button:hover {
+  background: var(--button-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
