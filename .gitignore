@@ -25,14 +25,12 @@ yarn-error.log*
 # -------------------------------
 
 # /src/components
-ChatBubble.js
 MenuVisualization.js
 
 # /src/contexts
 OrderContext.js
 
 # /src/styles
-ChatBubble.css
 MenuVisualization.css
 
 # /src/data
@@ -40,7 +38,6 @@ MenuVisualization.css
 # /src/services
 Api.js
 SpeechService.js
-ChatbotService.js
 STT_TTS_Guide.md
 
 # /src/pages

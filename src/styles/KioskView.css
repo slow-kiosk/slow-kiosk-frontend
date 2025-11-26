@@ -3,18 +3,18 @@
 /* 전체 배경 */
 .kiosk-view {
   width: 100%;
-  height: 100vh;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-
   padding: 40px;
+  box-sizing: border-box;
+  position: relative;
 }
 
 
 /* 메인 콘텐츠 */
 .kiosk-main-content {
-  max-width: 1200px;
   width: 100%;
   text-align: center;
 }
@@ -49,19 +49,19 @@
 }
 
 .feature-icon {
-  font-size: 64px;
+  font-size: calc(64px * var(--font-size-multiplier));
   margin-bottom: 20px;
   color: var(--bun-brown);
 }
 
 .feature-card h3 {
-  font-size: 28px;
+  font-size: calc(28px * var(--font-size-multiplier));
   margin-bottom: 15px;
   color: var(--patty-brown);
 }
 
 .feature-card p {
-  font-size: 20px;
+  font-size: calc(20px * var(--font-size-multiplier));
   color: var(--text-dark);
   line-height: 1.6;
 }
@@ -77,6 +77,56 @@
   border-radius: 10px;
 
   color: var(--patty-brown);
-  font-size: 20px;
+  font-size: calc(20px * var(--font-size-multiplier));
   line-height: 1.6;
+}
+
+/* 사용자 맞춤 설정 버튼 (하단 우측) */
+.global-settings-button {
+  position: absolute;
+  right: 40px;
+  bottom: 30px;
+  padding: 18px 34px;
+  border-radius: 999px;
+  border: 2px solid rgba(0, 0, 0, 0.15);
+  background: #ffffff;
+  color: #222222;
+  font-size: calc(22px * var(--font-size-multiplier));
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-inline: 34px 26px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    filter 0.18s ease;
+}
+
+.global-settings-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 26px rgba(0, 0, 0, 0.18);
+  background: linear-gradient(135deg, #fffaf0 0%, #ffe8c2 50%, #ffd89b 100%);
+  filter: brightness(1.02);
+}
+
+.global-settings-button:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.16);
+}
+
+.global-settings-button:focus-visible {
+  outline: 3px solid rgba(242, 201, 76, 0.9);
+  outline-offset: 3px;
+}
+
+.global-settings-button::before {
+  content: "⚙";
+  font-size: calc(18px * var(--font-size-multiplier));
+  line-height: 1;
 }

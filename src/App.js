@@ -3,12 +3,14 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import './styles/App.css';
 
 import { OrderProvider } from './contexts/OrderContext';
+import { AccessibilityProvider } from './contexts/AccessibilityContext';
 import Nav from "./components/Nav";
 import KioskView from "./pages/KioskView";
 import OrderingView from "./pages/OrderingView";
 import OrderListView from "./pages/OrderListView";
 import CheckoutView from "./pages/CheckoutView";
 import PaymentView from "./pages/PaymentView";
+import GlobalView from "./pages/GlobalView";
 
 function App() {
   useEffect(() => {
@@ -23,22 +25,26 @@ function App() {
   }, []);
 
   return (
-    <OrderProvider>
-      <Router>
-        <div className="kiosk-container">
-          <Nav />
-
-          <Routes>
-            <Route path="/" element={<KioskView />} />
-            <Route path="/kiosk" element={<KioskView />} />
-            <Route path="/ordering" element={<OrderingView />} />
-            <Route path="/order-list" element={<OrderListView />} />
-            <Route path="/checkout" element={<CheckoutView />} />
-            <Route path="/payment" element={<PaymentView />} />
-          </Routes>
-        </div>
-      </Router>
-    </OrderProvider>
+    <AccessibilityProvider>
+      <OrderProvider>
+        <Router>
+          <div className="kiosk-container">
+            <Nav />
+            <main className="kiosk-content">
+              <Routes>
+                <Route path="/" element={<KioskView />} />
+                <Route path="/kiosk" element={<KioskView />} />
+                <Route path="/ordering" element={<OrderingView />} />
+                <Route path="/order-list" element={<OrderListView />} />
+                <Route path="/checkout" element={<CheckoutView />} />
+                <Route path="/payment" element={<PaymentView />} />
+                <Route path="/global" element={<GlobalView />} />
+              </Routes>
+            </main>
+          </div>
+        </Router>
+      </OrderProvider>
+    </AccessibilityProvider>
   );
 }
 

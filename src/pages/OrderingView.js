@@ -19,7 +19,6 @@ const OrderingView = () => {
   const {
     orderItems,
     addItem,
-    removeItem,
     addChatMessage,
     setListening,
     setTranscript,
@@ -105,6 +104,12 @@ const OrderingView = () => {
   }, []);
 
   useEffect(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chatHistory, isProcessing]);
+
+  useEffect(() => {
     setStage('ordering');
     
     // 초기 인사말
@@ -169,16 +174,6 @@ const OrderingView = () => {
     navigate('/checkout');
   };
 
-  const handleRemoveItem = (index) => {
-    removeItem(index);
-    const message = {
-      role: 'assistant',
-      content: '주문에서 제거했습니다.',
-      suggestions: []
-    };
-    addChatMessage(message);
-  };
-
   const handleMenuClick = (menu) => {
     addItem({
       ...menu,
@@ -211,61 +206,9 @@ const OrderingView = () => {
   return (
     <div className="ordering-view">
       <div className="ordering-container">
-        <div className="ordering-left">
-          <div className="chat-section">
-            <h2 className="section-title">메뉴 주문</h2>
-            <div className="chat-container">
-              {chatHistory.map((msg, index) => (
-                <ChatBubble
-                  key={index}
-                  message={msg.content}
-                  isUser={msg.role === 'user'}
-                  suggestions={msg.suggestions || []}
-                  onSuggestionClick={handleSuggestionClick}
-                />
-              ))}
-              {isProcessing && (
-                <div className="processing-indicator">
-                  <div className="spinner"></div>
-                  <span>처리 중...</span>
-                </div>
-              )}
-              <div ref={chatEndRef} />
-            </div>
-            
-            <div className="voice-status">
-              <div className={`mic-indicator ${speechService.isListening ? 'active' : ''}`}>
-                <span className="mic-icon">🎤</span>
-                <span>{speechService.isListening ? '듣는 중...' : '음성 인식 대기'}</span>
-              </div>
-              {speechService.currentTranscript && (
-                <div className="transcript">
-                  {speechService.currentTranscript}
-                </div>
-              )}
-            </div>
-
-            <div className="button-group">
-              <button 
-                className="older-list-button"
-                onClick={handleOrderList}
-              >
-                주문 내역
-              </button>
-
-              <button 
-                className="order-complete-button"
-                onClick={handleCompleteOrder}
-              >
-                주문 완료
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="ordering-right">
+      <div className="ordering-left">
           <div className="menu-board-section">
-            <h2 className="section-title">메뉴판</h2>
+          <h2 className="section-title">메뉴 주문</h2>
             {loadingMenus ? (
               <div className="menu-loading">
                 <div className="spinner"></div>
@@ -327,6 +270,59 @@ const OrderingView = () => {
             )}
           </div>
         </div>
+
+        <div className="ordering-right">
+          <div className="chat-section">
+            <div className="chat-container">
+              {chatHistory.map((msg, index) => (
+                <ChatBubble
+                  key={index}
+                  message={msg.content}
+                  isUser={msg.role === 'user'}
+                  suggestions={msg.suggestions || []}
+                  onSuggestionClick={handleSuggestionClick}
+                />
+              ))}
+              {isProcessing && (
+                <ChatBubble
+                  key="typing-indicator"
+                  isTyping
+                />
+              )}
+              <div ref={chatEndRef} />
+            </div>
+            
+            <div className="voice-status">
+              <div className={`mic-indicator ${speechService.isListening ? 'active' : ''}`}>
+                <span className="mic-icon">🎤</span>
+                <span>{speechService.isListening ? '듣는 중...' : '음성 인식 대기'}</span>
+              </div>
+              {speechService.currentTranscript && (
+                <div className="transcript">
+                  {speechService.currentTranscript}
+                </div>
+              )}
+            </div>
+
+            <div className="button-group">
+              <button 
+                className="older-list-button"
+                onClick={handleOrderList}
+              >
+                주문 내역
+              </button>
+
+              <button 
+                className="order-complete-button"
+                onClick={handleCompleteOrder}
+              >
+                주문 완료
+              </button>
+            </div>
+          </div>
+        </div>
+
+
       </div>
     </div>
   );

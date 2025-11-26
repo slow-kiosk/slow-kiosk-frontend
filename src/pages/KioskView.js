@@ -22,6 +22,10 @@ const KioskView = () => {
     navigate('/payment');
   };
 
+  const handleOpenGlobalSettings = () => {
+    navigate('/global');
+  };
+
   return (
     <div className="kiosk-view">
       <div className="kiosk-main-content">
@@ -57,6 +61,13 @@ const KioskView = () => {
           </div>
         )}
       </div>
+      <button
+        type="button"
+        className="global-settings-button"
+        onClick={handleOpenGlobalSettings}
+      >
+        사용자 맞춤
+      </button>
     </div>
   );
 };

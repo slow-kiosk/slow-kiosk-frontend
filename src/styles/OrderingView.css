@@ -1,20 +1,24 @@
 .ordering-view {
   width: 100%;
-  height: 100vh;
+  height: 100vh; /* 전체 화면 기준으로 고정 */
   background: #f5f5f5;
   overflow: hidden;
-}
-
-.ordering-container {
-  display: flex;
-  height: 100%;
-  gap: 24px;
-  padding: 24px;
   box-sizing: border-box;
 }
 
-.ordering-left {
-  flex: 1;
+.ordering-container {
+  display: flex;              
+  flex-direction: column;    
+  height: 100%;              
+  min-height: 0;
+  gap: 24px;
+  padding: 24px;
+  box-sizing: border-box;
+  overflow: hidden;          
+}
+
+.ordering-left, .ordering-right {
+  flex: 1 0 0;               
   display: flex;
   flex-direction: column;
   background: white;
@@ -24,22 +28,14 @@
   overflow: hidden;
 }
 
-.ordering-right {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  background: white;
-  border-radius: 20px;
-  padding: 30px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-}
 
 .menu-board-section {
   display: flex;
   flex-direction: column;
   height: 100%;
+  overflow: hidden;
+  flex: 1;
+  min-height: 0; /* flex 아이템이 축소될 수 있도록*/
 }
 
 .menu-loading {
@@ -50,14 +46,14 @@
   gap: 15px;
   padding: 40px;
   color: var(--text-secondary);
-  font-size: 20px;
+  font-size: calc(20px * var(--font-size-multiplier));
 }
 
 .menu-empty-state {
   padding: 40px;
   text-align: center;
   color: var(--text-muted);
-  font-size: 20px;
+  font-size: calc(20px * var(--font-size-multiplier));
   background: #f8f9fa;
   border-radius: 16px;
 }
@@ -67,8 +63,16 @@
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
   overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  width: 100%;
+  align-content: start;
   padding-right: 10px;
   flex: 1;
+  min-height: 0;
+  --menu-card-height: 300px;
+  grid-auto-rows: var(--menu-card-height);
+  max-height: calc((var(--menu-card-height) * 2) + 20px);
 }
 
 .menu-grid::-webkit-scrollbar {
@@ -99,6 +103,7 @@
   display: flex;
   flex-direction: column;
   border: 2px solid transparent;
+  height: 100%;
 }
 
 .menu-card:hover {
@@ -148,7 +153,7 @@
 }
 
 .menu-card-placeholder {
-  font-size: 64px;
+  font-size: calc(64px * var(--font-size-multiplier));
   opacity: 0.3;
   display: flex;
   align-items: center;
@@ -207,7 +212,7 @@
   gap: 10px;
   padding: 15px;
   color: var(--text-secondary);
-  font-size: 20px;
+  font-size: calc(20px * var(--font-size-multiplier));
 }
 
 .spinner {
@@ -236,7 +241,7 @@
   display: flex;
   align-items: center;
   gap: 15px;
-  font-size: 24px;
+  font-size: calc(24px * var(--font-size-multiplier));
   color: var(--text-secondary);
   margin-bottom: 10px;
 }
@@ -260,14 +265,14 @@
 }
 
 .mic-icon {
-  font-size: 32px;
+  font-size: calc(32px * var(--font-size-multiplier));
 }
 
 .transcript {
   padding: 15px;
   background: white;
   border-radius: 10px;
-  font-size: 22px;
+  font-size: calc(22px * var(--font-size-multiplier));
   color: var(--text-primary);
   min-height: 30px;
   font-style: italic;
@@ -304,19 +309,19 @@
   background: #e3f2fd;
   color: var(--primary-purple);
   font-weight: 600;
-  font-size: 16px;
+  font-size: calc(16px * var(--font-size-multiplier));
 }
 
 .order-empty-state {
   padding: 30px;
   text-align: center;
   color: var(--text-muted);
-  font-size: 20px;
+  font-size: calc(20px * var(--font-size-multiplier));
   background: #f8f9fa;
   border-radius: 16px;
 }
 
-.order-items-grid {
+/* .order-items-grid {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -336,7 +341,7 @@
 .order-items-grid::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.15);
   border-radius: 8px;
-}
+} */
 
 .order-item-card {
   display: flex;
@@ -373,7 +378,7 @@
 
 .service-type-panel h3 {
   margin-bottom: 16px;
-  font-size: 24px;
+  font-size: calc(24px * var(--font-size-multiplier));
 }
 
 .service-buttons {
