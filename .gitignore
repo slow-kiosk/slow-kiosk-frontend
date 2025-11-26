@@ -28,7 +28,6 @@ yarn-error.log*
 MenuVisualization.js
 
 # /src/contexts
-OrderContext.js
 
 # /src/styles
 MenuVisualization.css
@@ -37,9 +36,7 @@ MenuVisualization.css
 
 # /src/services
 Api.js
-SpeechService.js
 STT_TTS_Guide.md
 
 # /src/pages
-
 User-Diagram.md
