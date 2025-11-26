@@ -1,5 +1,5 @@
-// 결제 수단 선택 페이지
-import React, { useState, useEffect, useCallback } from 'react';
+// 결제 수단 선택 페이지 - 포장 및 매장 식사 여부, 결제 수단 선택(카드, 모바일, 기프티콘)
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrder } from '../contexts/OrderContext';
 import speechService from '../services/SpeechService';
@@ -7,14 +7,21 @@ import '../styles/PaymentView.css';
 import '../components/Text.css';
 import '../components/Button.css';
 
-// 카드 결제 선택 시 카드를 꽂아주세요 라는 멘트가 나오도록
-// 결제 수단 등록 시 너무 로딩이 길다
+const SERVICE_NAMES = {
+  dineIn: '매장 식사',
+  takeout: '포장'
+};
+
+const REQUIRE_SERVICE_MESSAGE = '포장 또는 매장 식사를 먼저 선택해주세요.';
+
 const PaymentView = () => {
   const navigate = useNavigate();
   const {
     setStage,
     setListening,
     setTranscript,
+    serviceType,
+    setServiceType,
     paymentMethod,
     setPaymentMethod
   } = useOrder();
@@ -23,8 +30,22 @@ const PaymentView = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
 
+  // 서비스 타입 선택
+  const handleServiceTypeSelect = useCallback((type) => {
+    setServiceType(type);
+    setPaymentMethod(null);
+
+    const message = `${SERVICE_NAMES[type]}를 선택하셨습니다. 결제 방법을 선택해주세요.`;
+    speechService.speak(message);
+  }, [setServiceType, setPaymentMethod]);
+
   // 결제 수단 선택
   const handlePaymentMethodSelect = useCallback((method) => {
+    if (!serviceType) {
+      speechService.speak(REQUIRE_SERVICE_MESSAGE);
+      return;
+    }
+
     setPaymentMethod(method);
 
     const methodNames = {
@@ -38,11 +59,26 @@ const PaymentView = () => {
       content: `${methodNames[method]} 결제를 선택하셨습니다. 결제 수단을 등록하시겠습니까?`,
       suggestions: ['결제하기', '취소']
     };
-    speechService.speak(message.content);
-  }, [setPaymentMethod]);
+    const cardInstruction = method === 'card' ? ' 카드를 하단 단말기에 꽂아주세요.' : '';
+    const giftInstruction = method === 'giftcard' ? ' 기프티콘 바코드를 스캐너에 인식시켜주세요.' : '';
+
+
+    speechService.speak(`${message.content}${cardInstruction}`);
+    speechService.speak(`${message.content}${giftInstruction}`);
+  }, [serviceType, setPaymentMethod]);
 
   // 결제 완료 처리
   const handlePaymentMethodAdded = useCallback(() => { // 결제 수단 등록 완료 시 주문 진행 페이지로 이동
+    if (!serviceType) {
+      speechService.speak(REQUIRE_SERVICE_MESSAGE);
+      return;
+    }
+
+    if (!paymentMethod) {
+      speechService.speak('결제 수단을 먼저 선택해주세요.');
+      return;
+    }
+
     setIsProcessing(true);
 
     setTimeout(() => {
@@ -53,25 +89,31 @@ const PaymentView = () => {
 
       setTimeout(() => {
         navigate('/checkout');
-      }, 600);
-    }, 2000);
-  }, [navigate]);
+      }, 1000);
+    }, 1500);
+  }, [navigate, paymentMethod, serviceType]);
 
   // 음성 명령 처리 함수
   const handleVoiceInput = useCallback(
     (text) => {
       if (!text) return;
 
+      // 포장/매장 식사 선택
+      if (text.includes('포장')) {
+        handleServiceTypeSelect('takeout');
+      } else if (text.includes('매장') || text.includes('먹고') || text.includes('자리')) {
+        handleServiceTypeSelect('dineIn');
+      }
       // 결제 수단 선택
-      if (text.includes('카드') || text.includes('신용카드')) { // 카드
+      else if (text.includes('카드') || text.includes('신용카드')) { // 카드
         handlePaymentMethodSelect('card');
-      } else if (text.includes('모바일 삼성 / LG 페이 / 애플페이') || text.includes('스마트폰')) { // 모바일 삼성 / LG 페이
+      } else if (text.includes('모바일 삼성 / LG 페이 / 애플페이') || text.includes('스마트폰')) { // 모바일 삼성 / 애플페이
         handlePaymentMethodSelect('mobile');
       } else if (text.includes('기프티콘')) { // 기프티콘
         handlePaymentMethodSelect('giftcard');
       } 
       // 결제하기
-      else if (text.includes('결제') && paymentMethod) {
+      else if (text.includes('결제') && paymentMethod && serviceType) {
         handlePaymentMethodAdded();
       } 
       // 해당되지 않을 때
@@ -86,8 +128,16 @@ const PaymentView = () => {
 
       setIsProcessing(false);
     },
-    [paymentMethod, handlePaymentMethodSelect, handlePaymentMethodAdded]
+    [paymentMethod, serviceType, handleServiceTypeSelect, handlePaymentMethodSelect, handlePaymentMethodAdded]
   );
+
+  const introMessageSpokenRef = useRef(false);
+  useEffect(() => {
+    if (introMessageSpokenRef.current) return;
+    const introMessage = serviceType ? '결제 방법을 선택해주세요.' : REQUIRE_SERVICE_MESSAGE;
+    speechService.speak(introMessage);
+    introMessageSpokenRef.current = true;
+  }, [serviceType]);
 
   // 초기 음성 설정
   useEffect(() => {
@@ -118,12 +168,40 @@ const PaymentView = () => {
           <h2 className="section-title">결제 방법 선택</h2>
         </div>
 
+        <div className="service-type-section">
+          <h3 className="section-subtitle">포장 또는 매장 식사를 선택하세요</h3>
+          <div className="service-buttons">
+            <button
+              className={`service-button ${serviceType === 'takeout' ? 'selected' : ''}`}
+              onClick={() => handleServiceTypeSelect('takeout')}
+              disabled={isCompleted}
+            >
+              🥡 포장
+            </button>
+            <button
+              className={`service-button ${serviceType === 'dineIn' ? 'selected' : ''}`}
+              onClick={() => handleServiceTypeSelect('dineIn')}
+              disabled={isCompleted}
+            >
+              🍽️ 매장 식사
+            </button>
+          </div>
+          {!serviceType && (
+            <p className="service-helper">{REQUIRE_SERVICE_MESSAGE}</p>
+          )}
+          {serviceType && (
+            <p className="service-summary">
+              {serviceType === 'takeout' ? '포장을 선택하셨습니다.' : '매장 식사를 선택하셨습니다.'}
+            </p>
+          )}
+        </div>
+
         <div className="payment-methods">
           <div className="method-buttons">
             <button
               className={`method-button ${paymentMethod === 'card' ? 'selected' : ''}`}
               onClick={() => handlePaymentMethodSelect('card')}
-              disabled={isCompleted}
+              disabled={!serviceType || isCompleted}
             >
               <div className="method-icon">💳</div>
               <div className="method-name">카드</div>
@@ -132,7 +210,7 @@ const PaymentView = () => {
             <button
               className={`method-button ${paymentMethod === 'mobile' ? 'selected' : ''}`}
               onClick={() => handlePaymentMethodSelect('mobile')}
-              disabled={isCompleted}
+              disabled={!serviceType || isCompleted}
             >
               <div className="method-icon">📱</div>
               <div className="method-name">모바일</div>
@@ -141,7 +219,7 @@ const PaymentView = () => {
             <button
               className={`method-button ${paymentMethod === 'giftcard' ? 'selected' : ''}`}
               onClick={() => handlePaymentMethodSelect('giftcard')}
-              disabled={isCompleted}
+              disabled={!serviceType || isCompleted}
             >
               <div className="method-icon">🎁</div>
               <div className="method-name">기프티콘</div>
