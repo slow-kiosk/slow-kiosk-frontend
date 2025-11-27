@@ -155,11 +155,25 @@ class SpeechService {
       return;
     }
     
-    // TTS가 말하고 있다면 마이크를 켜지 못할 수 있으므로 TTS 중단
+    // TTS가 말하고 있다면 TTS가 끝날 때까지 대기 (중단하지 않음)
     if (this.synthesis && (this.synthesis.speaking || this.synthesis.pending)) {
-        this.synthesis.cancel();
+        // TTS가 끝날 때까지 대기 후 마이크 시작
+        const checkAndStart = () => {
+          if (this.synthesis.speaking || this.synthesis.pending) {
+            setTimeout(checkAndStart, 100);
+          } else {
+            // TTS가 끝났으므로 마이크 시작
+            this._doStart(shouldContinue);
+          }
+        };
+        checkAndStart();
+        return;
     }
     
+    this._doStart(shouldContinue);
+  }
+
+  _doStart(shouldContinue = true) {
     this.shouldContinueListening = shouldContinue; // 재시작 허용 플래그 켜기
     
     try {
@@ -232,11 +246,6 @@ class SpeechService {
       return;
     }
 
-    // 엔진 깨우기
-    if (!this.synthesis.speaking && !this.synthesis.pending) {
-        this.synthesis.cancel(); 
-    }
-
     // [수정] 무한 대기 방지: 목소리 로딩 재시도 10회(1초)로 제한
     if ((!this.isReady || this.voices.length === 0) && this.retryCount < 10) {
       this.loadVoices(); 
@@ -250,7 +259,25 @@ class SpeechService {
     // 재시도 횟수 초기화
     this.retryCount = 0;
 
-    this.synthesis.cancel(); // 기존 음성 중단
+    // 기존 음성이 재생 중이면 대기 후 재생 (중단하지 않음)
+    if (this.synthesis.speaking || this.synthesis.pending) {
+        // 현재 재생 중인 음성이 끝날 때까지 대기
+        const checkAndSpeak = () => {
+          if (this.synthesis.speaking || this.synthesis.pending) {
+            setTimeout(checkAndSpeak, 100);
+          } else {
+            // 이전 음성이 끝났으므로 새 음성 재생
+            this._doSpeak(text, options);
+          }
+        };
+        checkAndSpeak();
+        return;
+    }
+    
+    this._doSpeak(text, options);
+  }
+
+  _doSpeak(text, options = {}) {
 
     const utterance = new SpeechSynthesisUtterance(text);
     
@@ -276,16 +303,17 @@ class SpeechService {
     };
 
     utterance.onerror = (event) => {
-      // canceled 에러가 나더라도 다음 동작(마이크 켜기)은 진행되어야 함
-      if (event.error === 'canceled') {
-          // 의도된 취소일 경우 onEnd를 호출하지 않을 수도 있지만, 
-          // 키오스크 흐름상 끊겨도 마이크는 켜지는 게 낫다면 아래 주석 해제
-          // if (options.onEnd) options.onEnd(); 
-          console.log('[음성 출력] 취소됨:', text);
+      // "interrupted"와 "canceled"는 의도된 중단이므로 정상 동작으로 처리
+      if (event.error === 'canceled' || event.error === 'interrupted') {
+          // 의도된 취소/중단이므로 로그만 남기고 정상 처리
+          console.log('[음성 출력] 중단됨:', text, `(${event.error})`);
+          // 중단된 경우에도 흐름이 끊기지 않게 onEnd 호출
+          if (options.onEnd) options.onEnd();
       } else {
+        // 실제 오류만 에러로 로깅
         console.error('[음성 합성 오류]', event.error, '- 원본 텍스트:', text);
         this.synthesis.cancel();
-        // 에러 발생 시에도 흐름이 끊기지 않게 onEnd 호출 고려
+        // 에러 발생 시에도 흐름이 끊기지 않게 onEnd 호출
         if (options.onEnd) options.onEnd();
       }
       

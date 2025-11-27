@@ -24,7 +24,7 @@
 
 /* PaymentView에서 사용하는 큰 섹션 타이틀 */
 .payment-header .section-title {
-  font-size: 42px;
+  font-size: 52px;
   font-weight: 700;
   margin: 0;
   letter-spacing: -0.5px;
@@ -132,7 +132,7 @@
 
 /* 결제 관련 텍스트 */
 .method-name {
-  font-size: 28px;
+  font-size: 36px;
   font-weight: 600;
   color: var(--text-primary);
   letter-spacing: -0.3px;
