@@ -20,8 +20,8 @@ const GUIDE_MESSAGES = {
   
   // 에러 및 재확인
   requirePayment: '결제하실 방법을 먼저 골라주세요.',
-  complete: '네, 결제 수단이 확인되었습니다. 주문 내역을 마지막으로 보여드릴게요.',
-  retry: '잘 못 들었어요. 카드, 휴대폰, 기프티콘 중에 하나를 말씀해 주세요.'
+  complete: '네, 결제 수단이 확인되었습니다.',
+  retry: '잘 못 들었어요. 다시 말씀해주세요.'
 };
 
 const SERVICE_NAMES = {
@@ -29,6 +29,7 @@ const SERVICE_NAMES = {
   takeout: '포장'
 };
 
+// 바코드 인식 카메라 테스트 재진행 필요
 const PaymentView = () => {
   const navigate = useNavigate();
   const {
@@ -38,12 +39,21 @@ const PaymentView = () => {
     serviceType,
     setServiceType,
     paymentMethod,
-    setPaymentMethod
+    setPaymentMethod,
+    setGiftCard
   } = useOrder();
 
   // 상태 정의
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  
+  // 카메라 관련 상태
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [cameraPermission, setCameraPermission] = useState(null);
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [recognizedBarcode, setRecognizedBarcode] = useState(null);
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
 
   // 서비스 타입 선택 (포장 vs 매장)
   const handleServiceTypeSelect = useCallback((type) => {
@@ -54,6 +64,86 @@ const PaymentView = () => {
     speechService.speak(GUIDE_MESSAGES.serviceSelected(SERVICE_NAMES[type]));
   }, [setServiceType, setPaymentMethod]);
 
+  // 카메라 권한 요청 및 스트림 시작
+  const startCamera = useCallback(async () => {
+    try {
+      // 카메라 권한 확인
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            facingMode: 'environment', // 후면 카메라 우선 (모바일)
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          } 
+        });
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          setIsCameraActive(true);
+          setCameraPermission('granted');
+          speechService.speak('카메라가 준비되었습니다. 바코드를 스캔해주세요.');
+        }
+      } else {
+        throw new Error('카메라를 지원하지 않는 브라우저입니다.');
+      }
+    } catch (error) {
+      console.error('카메라 접근 오류:', error);
+      setCameraPermission('denied');
+      setIsCameraActive(false);
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        speechService.speak('카메라 권한이 필요합니다. 브라우저 설정에서 카메라 권한을 허용해주세요.');
+      } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+        speechService.speak('카메라를 찾을 수 없습니다.');
+      } else {
+        speechService.speak('카메라를 사용할 수 없습니다.');
+      }
+    }
+  }, []);
+
+  // 카메라 스트림 중지
+  const stopCamera = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setIsCameraActive(false);
+  }, []);
+
+  // 더미 바코드 데이터 생성
+  // 찍은 바코드가 자동으로 장바구니에 담기도록 => 추후 결제금액 0으로 나와야 함 (기프티콘 -4500 적용 표시 필요)
+  const generateDummyBarcode = () => {
+    const dummyBarcodes = [
+      { code: '8801234567890', menuName: '스테디 와퍼', price: 6900 },
+      { code: '8801234567891', menuName: '더블 치즈버거', price: 5900 },
+      { code: '8801234567892', menuName: '프렌치프라이 (R)', price: 2800 },
+      { code: '8801234567893', menuName: '모짜렐라 스틱 4조각', price: 3700 },
+      { code: '8801234567894', menuName: '콜라 제로 (R)', price: 2200 },
+    ];
+    return dummyBarcodes[Math.floor(Math.random() * dummyBarcodes.length)];
+  };
+
+  // 바코드 캡처 및 인식 시뮬레이션
+  const handleCapture = useCallback(() => {
+    if (!isCameraActive) return;
+    
+    setIsCapturing(true);
+    speechService.speak('바코드를 인식 중입니다.');
+    
+    // 3초 딜레이 후 더미 바코드 데이터 처리
+    setTimeout(() => {
+      const barcodeData = generateDummyBarcode();
+      setRecognizedBarcode(barcodeData);
+      setIsCapturing(false);
+      speechService.speak(`${barcodeData.menuName} 기프티콘이 인식되었습니다. 가격은 ${barcodeData.price.toLocaleString()}원입니다.`);
+      
+      // 바코드 정보를 OrderContext에 저장
+      setGiftCard(barcodeData.code);
+    }, 3000);
+  }, [isCameraActive, setGiftCard]);
+
   // 결제 수단 선택
   const handlePaymentMethodSelect = useCallback((method) => {
     if (!serviceType) {
@@ -62,6 +152,7 @@ const PaymentView = () => {
     }
 
     setPaymentMethod(method);
+    setRecognizedBarcode(null); // 결제 수단 변경 시 바코드 정보 초기화
 
     // 변경된 로직: 불필요한 질문("등록하시겠습니까?")을 없애고, 바로 행동(꽂아주세요/대주세요)을 안내
     let instructionMessage = '';
@@ -69,19 +160,25 @@ const PaymentView = () => {
     switch(method) {
       case 'card':
         instructionMessage = GUIDE_MESSAGES.payMethodCard;
+        stopCamera(); // 다른 결제 수단 선택 시 카메라 중지
         break;
       case 'mobile':
         instructionMessage = GUIDE_MESSAGES.payMethodMobile;
+        stopCamera(); // 다른 결제 수단 선택 시 카메라 중지
         break;
       case 'giftcard':
         instructionMessage = GUIDE_MESSAGES.payMethodGift;
+        // 기프티콘 선택 시 카메라 시작 (약간의 딜레이를 두어 UI 업데이트 후 실행)
+        setTimeout(() => {
+          startCamera();
+        }, 100);
         break;
       default:
         instructionMessage = '결제 수단이 선택되었습니다.';
     }
 
     speechService.speak(instructionMessage);
-  }, [serviceType, setPaymentMethod]);
+  }, [serviceType, setPaymentMethod, startCamera, stopCamera]);
 
   // 결제 수단 확정 및 다음 페이지 이동
   const handlePaymentMethodAdded = useCallback(() => { 
@@ -187,8 +284,9 @@ const PaymentView = () => {
       speechService.stop();
       setListening(false);
       speechService.clearTestVoiceInputHandler();
+      stopCamera(); // 컴포넌트 언마운트 시 카메라 정리
     };
-  }, [handleVoiceInput, setStage, setListening, setTranscript]);
+  }, [handleVoiceInput, setStage, setListening, setTranscript, stopCamera]);
 
   return (
     <div className="payment-view">
@@ -258,13 +356,89 @@ const PaymentView = () => {
           </div>
         </div>
 
+        {/* 기프티콘 선택 시 카메라 UI 표시 */}
+        {paymentMethod === 'giftcard' && (
+          <div className="camera-section">
+            <h3 className="section-subtitle">기프티콘 바코드를 스캔해주세요</h3>
+            
+            {cameraPermission === 'denied' ? (
+              <div className="camera-error">
+                <p>카메라 권한이 필요합니다.</p>
+                <button 
+                  className="retry-camera-button"
+                  onClick={startCamera}
+                >
+                  권한 다시 요청
+                </button>
+              </div>
+            ) : !isCameraActive && cameraPermission === null ? (
+              <div className="camera-loading">
+                <div className="loading-spinner"></div>
+                <p>카메라를 준비하는 중...</p>
+              </div>
+            ) : (
+              <>
+                <div className="video-container">
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="camera-video"
+                  />
+                  {isCapturing && (
+                    <div className="capture-overlay">
+                      <div className="capture-spinner"></div>
+                      <p>바코드를 인식 중입니다...</p>
+                    </div>
+                  )}
+                  {!isCapturing && isCameraActive && (
+                    <div className="scan-guide">
+                      <div className="scan-frame"></div>
+                      <p className="scan-hint">바코드를 프레임 안에 맞춰주세요</p>
+                    </div>
+                  )}
+                </div>
+                
+                <button
+                  className="capture-button"
+                  onClick={handleCapture}
+                  disabled={!isCameraActive || isCapturing}
+                >
+                  {isCapturing ? '인식 중...' : '📷 바코드 캡처'}
+                </button>
+                
+                {recognizedBarcode && (
+                  <div className="barcode-result">
+                    <h4 className="result-title">✅ 인식된 기프티콘</h4>
+                    <div className="barcode-info">
+                      <div className="barcode-item">
+                        <span className="barcode-label">바코드 번호:</span>
+                        <span className="barcode-value">{recognizedBarcode.code}</span>
+                      </div>
+                      <div className="barcode-item">
+                        <span className="barcode-label">메뉴명:</span>
+                        <span className="barcode-value">{recognizedBarcode.menuName}</span>
+                      </div>
+                      <div className="barcode-item">
+                        <span className="barcode-label">가격:</span>
+                        <span className="barcode-value price">{recognizedBarcode.price.toLocaleString()}원</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
         {/* 결제 수단 선택 시 나타나는 확정 버튼 - 버튼 텍스트도 더 직관적으로 변경 */}
         {paymentMethod && !isCompleted && (
           <div className="payment-action">
             <button
               className="complete-payment-button"
               onClick={handlePaymentMethodAdded}
-              disabled={isProcessing}
+              disabled={isProcessing || (paymentMethod === 'giftcard' && !recognizedBarcode)}
             >
               {isProcessing ? '확인하는 중입니다...' : '이걸로 결제할게요 (선택 완료)'}
             </button>

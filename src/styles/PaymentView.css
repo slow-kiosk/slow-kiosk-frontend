@@ -158,3 +158,260 @@
     transform: scale(1);
   }
 }
+
+/* 카메라 섹션 스타일 */
+.camera-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 20px;
+  box-shadow: inset 0 0 0 1px rgba(102, 126, 234, 0.15);
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  aspect-ratio: 4 / 3;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.camera-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* 미러 효과 */
+}
+
+.capture-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: white;
+  font-size: calc(1.4rem * var(--font-size-multiplier));
+  font-weight: 600;
+  z-index: 10;
+}
+
+.capture-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.capture-button {
+  padding: 16px 32px;
+  font-size: calc(1.4rem * var(--font-size-multiplier));
+  font-weight: 600;
+  color: white;
+  background: var(--primary-gradient, linear-gradient(135deg, #667eea, #764ba2));
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+}
+
+.capture-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.capture-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.camera-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  color: #ff6b6b;
+  font-size: calc(1.3rem * var(--font-size-multiplier));
+}
+
+.camera-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 40px;
+  color: #666;
+  font-size: calc(1.3rem * var(--font-size-multiplier));
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(102, 126, 234, 0.2);
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.scan-guide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.scan-frame {
+  width: 80%;
+  max-width: 300px;
+  height: 200px;
+  border: 3px solid #667eea;
+  border-radius: 12px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  position: relative;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.scan-frame::before,
+.scan-frame::after {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 3px solid #667eea;
+}
+
+.scan-frame::before {
+  top: -3px;
+  left: -3px;
+  border-right: none;
+  border-bottom: none;
+  border-top-left-radius: 12px;
+}
+
+.scan-frame::after {
+  bottom: -3px;
+  right: -3px;
+  border-left: none;
+  border-top: none;
+  border-bottom-right-radius: 12px;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.02);
+  }
+}
+
+.scan-hint {
+  margin-top: 20px;
+  color: white;
+  font-size: calc(1.2rem * var(--font-size-multiplier));
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+
+.retry-camera-button {
+  padding: 12px 24px;
+  font-size: calc(1.2rem * var(--font-size-multiplier));
+  font-weight: 600;
+  color: white;
+  background: #667eea;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retry-camera-button:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+}
+
+/* 바코드 인식 결과 스타일 */
+.barcode-result {
+  width: 100%;
+  max-width: 500px;
+  padding: 24px;
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+  animation: fadeIn 0.5s ease-in;
+}
+
+.result-title {
+  font-size: calc(1.6rem * var(--font-size-multiplier));
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 16px 0;
+  text-align: center;
+}
+
+.barcode-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.barcode-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.barcode-label {
+  font-size: calc(1.2rem * var(--font-size-multiplier));
+  font-weight: 600;
+  color: #666;
+}
+
+.barcode-value {
+  font-size: calc(1.3rem * var(--font-size-multiplier));
+  font-weight: 700;
+  color: #333;
+}
+
+.barcode-value.price {
+  color: var(--primary-purple, #667eea);
+  font-size: calc(1.5rem * var(--font-size-multiplier));
+}

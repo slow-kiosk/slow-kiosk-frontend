@@ -12,6 +12,7 @@ import '../components/Button.css';
 
 // 음성 인식 실패 시 다시 음성 요청하는 메세지 출력
 // 메뉴판 이미지 및 사진 더 크게 보여주도록
+// 주문 내역이라는 음성을 말하면 주문 내역 OrderListView로 이동
 const OrderingView = () => {
   const navigate = useNavigate();
   const {
