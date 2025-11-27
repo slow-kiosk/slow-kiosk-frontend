@@ -13,6 +13,10 @@ import '../components/Button.css';
 // 음성 인식 실패 시 다시 음성 요청하는 메세지 출력
 // 메뉴판 이미지 및 사진 더 크게 보여주도록
 // 주문 내역이라는 음성을 말하면 주문 내역 OrderListView로 이동
+
+// 무조건 음성 응답을 반환하도록 / 챗봇 응답 출력 시 작성되는 모션 보이도록 기능 추가 필요
+// 영양성분 질문 테스트 재진행 필요
+// 사용자가 메뉴 요청하면 메뉴가 맞는지 확인하는 메뉴 사진 이미지 출력
 const OrderingView = () => {
   const navigate = useNavigate();
   const {
@@ -33,10 +37,10 @@ const OrderingView = () => {
   const chatEndRef = useRef(null);
   const hasInitialized = useRef(false);
 
-  const handleOrderList = () => { // 주문 내역 확인
+  const handleOrderList = useCallback(() => { // 주문 내역 확인
     setStage('order-list');
     navigate('/order-list');
-  };
+  }, [setStage, navigate]);
 
   const handleVoiceInput = useCallback(async (text) => {
     if (isProcessing || !text.trim()) return;
@@ -49,6 +53,14 @@ const OrderingView = () => {
       content: text
     };
     addChatMessage(userMessage);
+
+    // "주문 내역" 음성 인식 처리
+    const normalizedText = text.trim().toLowerCase();
+    if (normalizedText.includes('주문 내역') || normalizedText.includes('주문내역')) {
+      setIsProcessing(false);
+      handleOrderList();
+      return;
+    }
 
     // 챗봇에 전달
     try {
@@ -69,11 +81,31 @@ const OrderingView = () => {
         const confirmMessage = {
           role: 'assistant',
           content: `${menu.name}를 주문 목록에 추가했습니다. 추가로 주문하시겠습니까?`,
-          suggestions: ['더 주문하기', '주문 완료', '주문 내역']
+          suggestions: ['더 주문하기', '주문 완료', '주문 내역'],
+          isTypingText: true // iMessage 스타일 타이핑 애니메이션
         };
         addChatMessage(confirmMessage);
-        speechService.speak(confirmMessage.content);
+        // 타이핑 애니메이션이 완료된 후 음성 출력
+        setTimeout(() => {
+          speechService.speak(confirmMessage.content);
+        }, confirmMessage.content.length * 30 + 200);
       } else {
+        // 챗봇 응답 처리
+        if (response.message) {
+          const assistantMessage = {
+            role: 'assistant',
+            content: response.message,
+            suggestions: response.suggestions || [],
+            isTypingText: true // iMessage 스타일 타이핑 애니메이션
+          };
+          addChatMessage(assistantMessage);
+          
+          // 타이핑 애니메이션이 완료된 후 음성 출력
+          setTimeout(() => {
+            speechService.speak(response.message);
+          }, response.message.length * 30 + 200);
+        }
+        
         // 액션 처리
         if (response.action === 'proceed_to_payment') {
           setTimeout(() => {
@@ -85,7 +117,7 @@ const OrderingView = () => {
     } finally {
       setIsProcessing(false);
     }
-  }, [isProcessing, orderItems, menus, addItem, addChatMessage, navigate]);
+  }, [isProcessing, orderItems, menus, addItem, addChatMessage, navigate, handleOrderList]);
 
   // 메뉴 데이터 가져오기
   useEffect(() => {
@@ -196,10 +228,14 @@ const OrderingView = () => {
     const confirmMessage = {
       role: 'assistant',
       content: `${menu.name}를 주문 목록에 추가했습니다. 추가로 주문하시겠습니까?`,
-      suggestions: ['더 주문하기', '주문 완료', '주문 내역']
+      suggestions: ['더 주문하기', '주문 완료', '주문 내역'],
+      isTypingText: true // iMessage 스타일 타이핑 애니메이션
     };
     addChatMessage(confirmMessage);
-    speechService.speak(confirmMessage.content);
+    // 타이핑 애니메이션이 완료된 후 음성 출력
+    setTimeout(() => {
+      speechService.speak(confirmMessage.content);
+    }, confirmMessage.content.length * 30 + 200);
   };
 
   const handleImageLoad = (menuId) => {
@@ -294,6 +330,7 @@ const OrderingView = () => {
                   isUser={msg.role === 'user'}
                   suggestions={msg.suggestions || []}
                   onSuggestionClick={handleSuggestionClick}
+                  isTypingText={msg.isTypingText || false}
                 />
               ))}
               {isProcessing && (

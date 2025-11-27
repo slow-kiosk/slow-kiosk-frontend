@@ -64,6 +64,16 @@ const PaymentView = () => {
     speechService.speak(GUIDE_MESSAGES.serviceSelected(SERVICE_NAMES[type]));
   }, [setServiceType, setPaymentMethod]);
 
+  const attachStreamToVideo = useCallback(() => {
+    if (!videoRef.current || !streamRef.current) return;
+    videoRef.current.srcObject = streamRef.current;
+    if (typeof videoRef.current.play === 'function') {
+      videoRef.current.play().catch((err) => {
+        console.debug('카메라 영상 재생 실패:', err);
+      });
+    }
+  }, []);
+
   // 카메라 권한 요청 및 스트림 시작
   const startCamera = useCallback(async () => {
     try {
@@ -77,12 +87,11 @@ const PaymentView = () => {
           } 
         });
         streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          setIsCameraActive(true);
-          setCameraPermission('granted');
-          speechService.speak('카메라가 준비되었습니다. 바코드를 스캔해주세요.');
-        }
+        setIsCameraActive(true);
+        setCameraPermission('granted');
+        console.log('[권한] 카메라 권한 허용됨');
+        attachStreamToVideo();
+        speechService.speak('카메라가 준비되었습니다. 바코드를 스캔해주세요.');
       } else {
         throw new Error('카메라를 지원하지 않는 브라우저입니다.');
       }
@@ -98,7 +107,7 @@ const PaymentView = () => {
         speechService.speak('카메라를 사용할 수 없습니다.');
       }
     }
-  }, []);
+  }, [attachStreamToVideo]);
 
   // 카메라 스트림 중지
   const stopCamera = useCallback(() => {
@@ -168,10 +177,7 @@ const PaymentView = () => {
         break;
       case 'giftcard':
         instructionMessage = GUIDE_MESSAGES.payMethodGift;
-        // 기프티콘 선택 시 카메라 시작 (약간의 딜레이를 두어 UI 업데이트 후 실행)
-        setTimeout(() => {
-          startCamera();
-        }, 100);
+        startCamera();
         break;
       default:
         instructionMessage = '결제 수단이 선택되었습니다.';
@@ -288,6 +294,43 @@ const PaymentView = () => {
     };
   }, [handleVoiceInput, setStage, setListening, setTranscript, stopCamera]);
 
+  // 권한 승인 여부를 콘솔에 기록
+  useEffect(() => {
+    if (!navigator?.permissions) return undefined;
+
+    const permissionNames = ['camera', 'microphone'];
+    const cleanupFns = [];
+
+    permissionNames.forEach((name) => {
+      navigator.permissions.query({ name })
+        .then((status) => {
+          const label = name === 'camera' ? '카메라' : '마이크';
+          if (status.state === 'granted') {
+            console.log(`[권한] ${label} 권한 허용됨`);
+          }
+          const handleChange = () => {
+            if (status.state === 'granted') {
+              console.log(`[권한] ${label} 권한 허용됨`);
+            }
+          };
+          status.addEventListener('change', handleChange);
+          cleanupFns.push(() => status.removeEventListener('change', handleChange));
+        })
+        .catch((err) => {
+          console.debug('Permissions API query failed:', name, err);
+        });
+    });
+
+    return () => {
+      cleanupFns.forEach((cleanup) => cleanup());
+    };
+  }, []);
+
+  useEffect(() => {
+    if (paymentMethod !== 'giftcard') return;
+    attachStreamToVideo();
+  }, [paymentMethod, isCameraActive, attachStreamToVideo]);
+
   return (
     <div className="payment-view">
       <div className="payment-container">
@@ -375,6 +418,12 @@ const PaymentView = () => {
               <div className="camera-loading">
                 <div className="loading-spinner"></div>
                 <p>카메라를 준비하는 중...</p>
+                <div className="video-container placeholder">
+                  <div className="scan-guide">
+                    <div className="scan-frame waiting"></div>
+                    <p className="scan-hint">잠시 후 바코드 인식 화면이 열립니다</p>
+                  </div>
+                </div>
               </div>
             ) : (
               <>
