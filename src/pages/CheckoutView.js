@@ -122,6 +122,9 @@ const CheckoutView = () => {
   useEffect(() => {
     setStage('discount');
     
+    // 개발자 콘솔 테스트용 핸들러 등록
+    speechService.setTestVoiceInputHandler(handleVoiceInput);
+    
     // 결제가 완료된 상태라면, 장바구니가 비어있어도 /ordering으로 보내지 않음
     if (isPaymentCompleted.current) {
       return;
@@ -160,6 +163,8 @@ const CheckoutView = () => {
     return () => {
       speechService.stop();
       setListening(false);
+      // 컴포넌트 언마운트 시 테스트 핸들러 제거
+      speechService.clearTestVoiceInputHandler();
     };
   }, [orderItems, totalPrice, setStage, addChatMessage, setListening, setTranscript, navigate, handleVoiceInput]);
 

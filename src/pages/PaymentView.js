@@ -7,6 +7,7 @@ import '../styles/PaymentView.css';
 import '../components/Text.css';
 import '../components/Button.css';
 
+// 결제 하기 음성으로 말할 경우 paymentview 페이지로 이동되는 부분 수정 필요 => checkoutview 페이지로 이동되도록
 const SERVICE_NAMES = {
   dineIn: '매장 식사',
   takeout: '포장'
@@ -107,7 +108,7 @@ const PaymentView = () => {
       // 결제 수단 선택
       else if (text.includes('카드') || text.includes('신용카드')) { // 카드
         handlePaymentMethodSelect('card');
-      } else if (text.includes('모바일 삼성 / LG 페이 / 애플페이') || text.includes('스마트폰')) { // 모바일 삼성 / 애플페이
+      } else if (text.includes('모바일')) { // 모바일 삼성 / 애플페이
         handlePaymentMethodSelect('mobile');
       } else if (text.includes('기프티콘')) { // 기프티콘
         handlePaymentMethodSelect('giftcard');
@@ -142,6 +143,9 @@ const PaymentView = () => {
   // 초기 음성 설정
   useEffect(() => {
     setStage('payment');
+    
+    // 개발자 콘솔 테스트용 핸들러 등록
+    speechService.setTestVoiceInputHandler(handleVoiceInput);
 
     speechService.onResult((result) => {
       if (result.final) {
@@ -152,12 +156,24 @@ const PaymentView = () => {
       }
     });
 
+    speechService.onError((error) => {
+      console.error('음성 인식 오류:', error);
+      if (error === 'no-speech') {
+        // 음성이 없을 때는 무시
+        return;
+      }
+      // 음성 입력 실패 시 테스트 코드 사용 안내
+      speechService.logTestCodeInstructions();
+    });
+
     speechService.start(true);
     setListening(true);
 
     return () => {
       speechService.stop();
       setListening(false);
+      // 컴포넌트 언마운트 시 테스트 핸들러 제거
+      speechService.clearTestVoiceInputHandler();
     };
   }, [handleVoiceInput, setStage, setListening, setTranscript, navigate]);
 

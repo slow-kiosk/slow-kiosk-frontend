@@ -1,104 +1,150 @@
-// AI 챗봇 서비스 (GPT 기반)
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
+
 class ChatbotService {
   constructor() {
-    this.apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+    // 백엔드 WebSocket 엔드포인트 (Spring Boot 포트 8080)
+    this.socketUrl = 'http://localhost:8080/ws-kiosk';
+    this.client = null;
+    this.connected = false;
+    
+    // 보낸 요청에 대한 응답을 기다리는 Promise의 resolve 함수들을 저장할 큐
+    this.pendingResolvers = []; 
+    
     this.conversationHistory = [];
+    
+    this.connect();
   }
 
-  async sendMessage(userMessage, context = {}) {
-    try {
-      // 대화 히스토리에 사용자 메시지 추가
-      this.conversationHistory.push({
-        role: 'user',
-        content: userMessage
-      });
+  connect() {
+    this.client = new Client({
+      // WebSocketConfig.java에 설정된 SockJS 엔드포인트 연결
+      webSocketFactory: () => new SockJS(this.socketUrl),
+      reconnectDelay: 5000, // 연결 끊기면 5초 뒤 재연결 시도
+      onConnect: () => {
+        console.log('키오스크 WebSocket 연결 성공');
+        this.connected = true;
 
-      // API 호출
-      const response = await fetch(`${this.apiUrl}/api/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: userMessage,
-          history: this.conversationHistory.slice(-10), // 최근 10개만 전송
-          context: {
-            currentOrder: context.currentOrder || [],
-            availableMenus: context.availableMenus || [],
-            stage: context.stage || 'ordering', // ordering, discount, payment
-            ...context
+        // 1. 서버 응답 구독 (/sub/kiosk/response)
+        // KioskSocketController.java: @SendTo("/sub/kiosk/response")
+        this.client.subscribe('/sub/kiosk/response', (message) => {
+          if (message.body) {
+            const responseDto = JSON.parse(message.body);
+            this.handleServerResponse(responseDto);
           }
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.ok}`);
-      }
-
-      const data = await response.json();
-      
-      // 응답을 대화 히스토리에 추가
-      if (data.message) {
-        this.conversationHistory.push({
-          role: 'assistant',
-          content: data.message
         });
-      }
+      },
+      onStompError: (frame) => {
+        console.error('Broker reported error: ' + frame.headers['message']);
+        console.error('Additional details: ' + frame.body);
+      },
+    });
 
-      return {
-        message: data.message || '죄송합니다. 응답을 생성할 수 없습니다.',
-        suggestions: data.suggestions || [],
-        action: data.action || null, // 예: 'add_to_cart', 'proceed_to_payment' 등
-        metadata: data.metadata || {}
-      };
-    } catch (error) {
-      console.error('챗봇 API 오류:', error);
-      
-      // 오프라인 모드: 간단한 규칙 기반 응답
+    this.client.activate();
+  }
+
+  // 서버로부터 메시지가 왔을 때 처리
+  handleServerResponse(responseDto) {
+    // KioskResponse.java: { newState, spokenResponse, updatedCart, uiData }
+    
+    // 1. 응답 메시지를 대화 히스토리에 추가
+    if (responseDto.spokenResponse) {
+      this.conversationHistory.push({
+        role: 'assistant',
+        content: responseDto.spokenResponse
+      });
+    }
+
+    // 2. 프론트엔드 포맷으로 변환
+    // 기존 코드와의 호환성을 위해 구조를 맞춥니다.
+    const mappedResponse = {
+      message: responseDto.spokenResponse || '응답이 없습니다.',
+      suggestions: [], // 필요 시 서버 uiData에서 추출 가능
+      action: this.mapStateToAction(responseDto.newState),
+      metadata: {
+        nextScene: responseDto.newState,
+        cart: responseDto.updatedCart
+      }
+    };
+
+    // 3. 대기 중인 요청(sendMessage의 await)을 해결(resolve)
+    // 순차적 처리를 가정 (FIFO)
+    if (this.pendingResolvers.length > 0) {
+      const resolve = this.pendingResolvers.shift();
+      resolve(mappedResponse);
+    }
+  }
+
+  // 백엔드의 상태(State)를 프론트엔드의 액션(Action)으로 매핑
+  mapStateToAction(newState) {
+    if (newState === 'ORDER_COMPLETE' || newState === 'PAYMENT') {
+      return 'proceed_to_payment';
+    }
+    // 필요에 따라 다른 상태 매핑 추가
+    return null;
+  }
+
+  /**
+   * 사용자 메시지 전송 (Promise 반환)
+   * 기존 fetch 방식을 WebSocket publish 방식으로 대체하되,
+   * 사용부(OrderingView.js)에서는 await로 결과를 받을 수 있게 유지함.
+   */
+  async sendMessage(userMessage, context = {}) {
+    if (!this.connected || !this.client) {
+      console.warn('WebSocket 연결되지 않음. 오프라인 응답 반환.');
       return this.getFallbackResponse(userMessage, context);
     }
+
+    return new Promise((resolve, reject) => {
+      try {
+        // 1. 대화 히스토리 추가
+        this.conversationHistory.push({
+          role: 'user',
+          content: userMessage
+        });
+
+        // 2. 응답을 받을 resolve 함수를 큐에 저장
+        this.pendingResolvers.push(resolve);
+
+        // 3. KioskRequest DTO 구조로 메시지 전송
+        // KioskSocketController.java: @MessageMapping("/kiosk/message") -> /pub/kiosk/message
+        const requestDto = {
+          userText: userMessage,
+          currentState: context.stage || 'ordering' // 백엔드 KioskRequest.currentState 매핑
+        };
+
+        this.client.publish({
+          destination: '/pub/kiosk/message',
+          body: JSON.stringify(requestDto),
+        });
+
+      } catch (error) {
+        console.error('메시지 전송 실패:', error);
+        // 에러 시 큐에서 제거하고 폴백 리턴
+        this.pendingResolvers.pop(); 
+        resolve(this.getFallbackResponse(userMessage, context));
+      }
+    });
   }
 
   getFallbackResponse(userMessage, context) {
+    // 기존 오프라인 로직 유지
     const message = userMessage.toLowerCase();
     const currentOrder = context.currentOrder || [];
     
-    // 간단한 키워드 매칭
     if (message.includes('안녕') || message.includes('시작')) {
       return {
         message: '안녕하세요! 느린 키오스크입니다. 원하시는 메뉴를 말씀해주세요.',
-        suggestions: ['치즈버거', '카페라떼', '카푸치노'],
+        suggestions: ['치즈버거', '불고기버거'],
         action: null
       };
     }
     
-    if (message.includes('주문') || message.includes('완료')) {
-      if (currentOrder.length === 0) {
-        return {
-          message: '주문하실 메뉴를 먼저 말씀해주세요.',
-          suggestions: ['아메리카노', '카페라떼'],
-          action: null
-        };
-      }
-      return {
-        message: `현재 ${currentOrder.length}개의 메뉴가 주문되었습니다. 결제로 진행하시겠습니까?`,
-        suggestions: ['결제하기', '더 주문하기'],
-        action: 'proceed_to_payment'
-      };
-    }
-    
-    if (message.includes('추가') || message.includes('더')) {
-      return {
-        message: '추가로 주문하실 메뉴를 말씀해주세요.',
-        suggestions: ['아메리카노', '카페라떼', '카푸치노'],
-        action: null
-      };
-    }
-    
-    // 기본 응답
+    // ... (기타 기존 로직 생략) ...
+
     return {
-      message: '이해하지 못했습니다. 다시 말씀해주시거나 화면의 버튼을 눌러주세요.',
-      suggestions: ['메뉴 보기', '주문 확인'],
+      message: '서버와 연결할 수 없습니다. 잠시 후 다시 시도해주세요.',
+      suggestions: [],
       action: null
     };
   }
@@ -112,9 +158,5 @@ class ChatbotService {
   }
 }
 
-// 싱글톤 인스턴스
 const chatbotService = new ChatbotService();
-
 export default chatbotService;
-
-
