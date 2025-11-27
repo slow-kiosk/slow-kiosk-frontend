@@ -140,8 +140,8 @@ const CheckoutView = () => {
       hasInitialized.current = true;
       const welcomeMessage = {
         role: 'assistant',
-        content: `주문 금액은 ${totalPrice.toLocaleString()}원입니다. 쿠폰이나 기프티콘이 있으시면 말씀해주세요. 없으시면 '결제하기'라고 말씀해주세요.`,
-        suggestions: ['쿠폰 사용', '기프티콘 사용', '결제하기']
+        content: `주문 금액은 ${totalPrice.toLocaleString()}원입니다.`,
+        suggestions: ['결제하기']
       };
       addChatMessage(welcomeMessage);
       speechService.speak(welcomeMessage.content);

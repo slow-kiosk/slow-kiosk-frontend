@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useOrder } from '../contexts/OrderContext';
 import '../styles/PaymentView.css';
 
+
+// 메뉴 추가 시 기존에 주문 목록에 있는 메뉴라면 수량 +1로 수정
+// 주문 내역 UI 수정 필요
 const OrderListView = () => {
   const navigate = useNavigate();
   const { orderItems, totalPrice, discount, finalPrice } = useOrder();
