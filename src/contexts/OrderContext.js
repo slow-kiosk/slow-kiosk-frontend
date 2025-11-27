@@ -37,12 +37,37 @@ const ActionTypes = {
 // 리듀서
 function orderReducer(state, action) {
   switch (action.type) {
-    case ActionTypes.ADD_ITEM:
-      const newItems = [...state.orderItems, action.payload];
+    case ActionTypes.ADD_ITEM: {
+      const incoming = action.payload;
+      const existingIndex = state.orderItems.findIndex((item) => {
+        if (item.id && incoming.id) {
+          return item.id === incoming.id;
+        }
+        return item.name === incoming.name;
+      });
+
+      let updatedItems;
+      if (existingIndex !== -1) {
+        updatedItems = state.orderItems.map((item, index) =>
+          index === existingIndex
+            ? {
+                ...item,
+                quantity: (item.quantity || 1) + (incoming.quantity || 1)
+              }
+            : item
+        );
+      } else {
+        updatedItems = [
+          ...state.orderItems,
+          { ...incoming, quantity: incoming.quantity || 1 }
+        ];
+      }
+
       return {
         ...state,
-        orderItems: newItems
+        orderItems: updatedItems
       };
+    }
     
     case ActionTypes.REMOVE_ITEM:
       return {
@@ -117,7 +142,10 @@ function orderReducer(state, action) {
       };
     
     case ActionTypes.CALCULATE_TOTAL:
-      const total = state.orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const total = state.orderItems.reduce(
+        (sum, item) => sum + (item.price * (item.quantity || 1)),
+        0
+      );
       return {
         ...state,
         totalPrice: total,

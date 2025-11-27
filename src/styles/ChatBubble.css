@@ -45,6 +45,22 @@
   position: relative;
 }
 
+.chat-message-media {
+  margin-top: 12px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.chat-message-media img {
+  display: block;
+  max-width: 260px;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
 .typing-cursor {
   display: inline-block;
   margin-left: 2px;

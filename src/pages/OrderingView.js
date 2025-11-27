@@ -17,6 +17,7 @@ import '../components/Button.css';
 // 무조건 음성 응답을 반환하도록 / 챗봇 응답 출력 시 작성되는 모션 보이도록 기능 추가 필요
 // 영양성분 질문 테스트 재진행 필요
 // 사용자가 메뉴 요청하면 메뉴가 맞는지 확인하는 메뉴 사진 이미지 출력
+// 주문 완료 라고 음성으로 말할 경우 CheckoutView로 이동 
 const OrderingView = () => {
   const navigate = useNavigate();
   const {
@@ -82,7 +83,9 @@ const OrderingView = () => {
           role: 'assistant',
           content: `${menu.name}를 주문 목록에 추가했습니다. 추가로 주문하시겠습니까?`,
           suggestions: ['더 주문하기', '주문 완료', '주문 내역'],
-          isTypingText: true // iMessage 스타일 타이핑 애니메이션
+          isTypingText: true, // iMessage 스타일 타이핑 애니메이션
+          imageUrl: menu.imageUrl,
+          imageAlt: `${menu.name} 이미지`
         };
         addChatMessage(confirmMessage);
         // 타이핑 애니메이션이 완료된 후 음성 출력
@@ -229,7 +232,9 @@ const OrderingView = () => {
       role: 'assistant',
       content: `${menu.name}를 주문 목록에 추가했습니다. 추가로 주문하시겠습니까?`,
       suggestions: ['더 주문하기', '주문 완료', '주문 내역'],
-      isTypingText: true // iMessage 스타일 타이핑 애니메이션
+      isTypingText: true, // iMessage 스타일 타이핑 애니메이션
+      imageUrl: menu.imageUrl,
+      imageAlt: `${menu.name} 이미지`
     };
     addChatMessage(confirmMessage);
     // 타이핑 애니메이션이 완료된 후 음성 출력
@@ -331,6 +336,8 @@ const OrderingView = () => {
                   suggestions={msg.suggestions || []}
                   onSuggestionClick={handleSuggestionClick}
                   isTypingText={msg.isTypingText || false}
+                  imageUrl={msg.imageUrl}
+                  imageAlt={msg.imageAlt}
                 />
               ))}
               {isProcessing && (

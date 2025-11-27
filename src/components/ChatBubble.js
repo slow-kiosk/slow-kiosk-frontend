@@ -7,7 +7,9 @@ const ChatBubble = ({
   suggestions = [],
   onSuggestionClick,
   isTyping = false,
-  isTypingText = false // iMessage 스타일 타이핑 애니메이션
+  isTypingText = false, // iMessage 스타일 타이핑 애니메이션
+  imageUrl,
+  imageAlt
 }) => {
   const [displayedText, setDisplayedText] = useState('');
   const [isAnimating, setIsAnimating] = useState(false);
@@ -38,6 +40,7 @@ const ChatBubble = ({
 
   const showSuggestions = !isUser && !isTyping && !isAnimating && suggestions.length > 0;
   const displayMessage = isTypingText && isAnimating ? displayedText : message;
+  const showImage = imageUrl && (!isTypingText || !isAnimating);
 
   return (
     <div className={`chat-bubble ${isUser ? 'user' : 'assistant'}`}>
@@ -49,10 +52,17 @@ const ChatBubble = ({
             <span className="typing-dot" />
           </div>
         ) : (
-          <p>
-            {displayMessage}
-            {isAnimating && <span className="typing-cursor">|</span>}
-          </p>
+          <>
+            <p>
+              {displayMessage}
+              {isAnimating && <span className="typing-cursor">|</span>}
+            </p>
+            {showImage && (
+              <div className="chat-message-media">
+                <img src={imageUrl} alt={imageAlt || '관련 이미지'} />
+              </div>
+            )}
+          </>
         )}
       </div>
       {showSuggestions && (
