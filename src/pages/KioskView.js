@@ -7,6 +7,7 @@ import '../styles/KioskView.css';
 import '../components/Text.css';
 import '../components/Button.css';
 
+// 주문 시작하기 말로도 사용 가능하도록
 const KioskView = () => {
   const navigate = useNavigate();
   const { clearOrder, setStage } = useOrder();

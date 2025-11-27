@@ -10,10 +10,8 @@ import '../styles/OrderingView.css';
 import '../components/Text.css';
 import '../components/Button.css'; 
 
-// 주문 내역 확인 버튼 만들어서 주문 내역 확인 페이지로 이동하도록
-// 주문 완료 버튼 필요
-// 주문 시 상품 이미지 출력
-// 결제 방법 선택 전 포장, 매장 선택 가능하게끔
+// 음성 인식 실패 시 다시 음성 요청하는 메세지 출력
+// 메뉴판 이미지 및 사진 더 크게 보여주도록
 const OrderingView = () => {
   const navigate = useNavigate();
   const {
@@ -112,6 +110,9 @@ const OrderingView = () => {
   useEffect(() => {
     setStage('ordering');
     
+    // 개발자 콘솔 테스트용 핸들러 등록
+    speechService.setTestVoiceInputHandler(handleVoiceInput);
+    
     // 초기 인사말
     if (!hasInitialized.current) {
       hasInitialized.current = true;
@@ -144,15 +145,26 @@ const OrderingView = () => {
         content: '음성 인식에 문제가 발생했습니다. 다시 시도해주세요.',
         suggestions: []
       });
+      // 음성 입력 실패 시 테스트 코드 사용 안내
+      speechService.logTestCodeInstructions();
     });
 
-    // 음성 인식 시작
-    speechService.start(true);
-    setListening(true);
+    // 음성 인식 시작 (안전 장치 추가)
+    // 이미 듣고 있는 중(isListening)이라면 start를 호출하지 않도록 막습니다.
+    if (!speechService.isListening) {
+      try {
+        speechService.start(true);
+        setListening(true);
+      } catch (e) {
+        console.log("이미 마이크가 켜져 있습니다.");
+      }
+    }
 
     return () => {
       speechService.stop();
       setListening(false);
+      // 컴포넌트 언마운트 시 테스트 핸들러 제거
+      speechService.clearTestVoiceInputHandler();
     };
   }, [addChatMessage, setListening, setTranscript, setStage, handleVoiceInput]);
 

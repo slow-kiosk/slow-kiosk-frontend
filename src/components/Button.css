@@ -272,3 +272,38 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
+
+/* Service Button (Payment View) */
+.service-buttons {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.service-button {
+  min-width: 180px;
+  margin-top: 30px;
+  padding: 50px 58px;
+  border-radius: 16px;
+  border: 2px solid transparent;
+  background: #f1f3ff;
+  font-size: calc(2rem * var(--font-size-multiplier));
+  font-weight: 600;
+  color: #4a4a6a;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.service-button.selected {
+  background: var(--primary-gradient);
+  color: var(--text-light);
+  border-color: transparent;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.25);
+}
+
+.service-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
