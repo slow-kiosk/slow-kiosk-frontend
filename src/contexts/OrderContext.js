@@ -8,6 +8,7 @@ const initialState = {
   finalPrice: 0,
   couponCode: null,
   giftCardCode: null,
+  giftCardInfo: null, // 기프티콘 정보 { code, menuName, price }
   stage: 'kiosk', // kiosk, ordering, discount, payment
   chatHistory: [],
   isListening: false,
@@ -100,10 +101,19 @@ function orderReducer(state, action) {
       };
     
     case ActionTypes.SET_GIFT_CARD:
-      return {
-        ...state,
-        giftCardCode: action.payload
-      };
+      // payload가 문자열이면 코드만, 객체면 전체 정보 저장
+      if (typeof action.payload === 'string') {
+        return {
+          ...state,
+          giftCardCode: action.payload
+        };
+      } else {
+        return {
+          ...state,
+          giftCardCode: action.payload.code,
+          giftCardInfo: action.payload
+        };
+      }
     
     case ActionTypes.SET_STAGE:
       return {
@@ -146,10 +156,13 @@ function orderReducer(state, action) {
         (sum, item) => sum + (item.price * (item.quantity || 1)),
         0
       );
+      // 기프티콘 금액을 할인으로 계산
+      const giftCardDiscount = state.giftCardInfo ? state.giftCardInfo.price : 0;
+      const totalDiscount = state.discount + giftCardDiscount;
       return {
         ...state,
         totalPrice: total,
-        finalPrice: Math.max(0, total - state.discount)
+        finalPrice: Math.max(0, total - totalDiscount)
       };
     
     default:

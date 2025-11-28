@@ -40,7 +40,8 @@ const PaymentView = () => {
     setServiceType,
     paymentMethod,
     setPaymentMethod,
-    setGiftCard
+    setGiftCard,
+    addItem
   } = useOrder();
 
   // 상태 정의
@@ -148,10 +149,23 @@ const PaymentView = () => {
       setIsCapturing(false);
       speechService.speak(`${barcodeData.menuName} 기프티콘이 인식되었습니다. 가격은 ${barcodeData.price.toLocaleString()}원입니다.`);
       
-      // 바코드 정보를 OrderContext에 저장
-      setGiftCard(barcodeData.code);
+      // 바코드 정보를 OrderContext에 저장 (전체 정보 저장)
+      setGiftCard({
+        code: barcodeData.code,
+        menuName: barcodeData.menuName,
+        price: barcodeData.price
+      });
+      
+      // 기프티콘 상품을 주문 내역에 추가
+      addItem({
+        id: `giftcard-${barcodeData.code}`,
+        name: `${barcodeData.menuName} (기프티콘)`,
+        price: barcodeData.price,
+        quantity: 1,
+        isGiftCard: true
+      });
     }, 3000);
-  }, [isCameraActive, setGiftCard]);
+  }, [isCameraActive, setGiftCard, addItem]);
 
   // 결제 수단 선택
   const handlePaymentMethodSelect = useCallback((method) => {
@@ -209,7 +223,12 @@ const PaymentView = () => {
       speechService.speak(GUIDE_MESSAGES.complete);
 
       setTimeout(() => {
-        navigate('/checkout');
+        // 기프티콘 선택 시 OrderingView로 이동, 그 외는 CheckoutView로 이동
+        if (paymentMethod === 'giftcard') {
+          navigate('/ordering');
+        } else {
+          navigate('/checkout');
+        }
       }, 1500); // 멘트를 들을 시간 확보 후 이동
     }, 1500);
   }, [navigate, paymentMethod, serviceType]);

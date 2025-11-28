@@ -9,7 +9,7 @@ import '../styles/OrderListView.css';
 // 주문 내역 UI 수정 필요
 const OrderListView = () => {
   const navigate = useNavigate();
-  const { orderItems, totalPrice, discount, finalPrice, setListening, setTranscript, setStage } = useOrder();
+  const { orderItems, totalPrice, discount, finalPrice, giftCardInfo, setListening, setTranscript, setStage } = useOrder();
   const [isProcessing, setIsProcessing] = useState(false);
 
   // 주문 페이지로 돌아가기
@@ -117,6 +117,12 @@ const OrderListView = () => {
               <div className="order-list-row order-list-row-discount">
                 <span>할인 금액</span>
                 <strong>-{discount.toLocaleString()}원</strong>
+              </div>
+            )}
+            {giftCardInfo && giftCardInfo.price > 0 && (
+              <div className="order-list-row order-list-row-discount">
+                <span>기프티콘 할인 ({giftCardInfo.menuName})</span>
+                <strong>-{giftCardInfo.price.toLocaleString()}원</strong>
               </div>
             )}
 
