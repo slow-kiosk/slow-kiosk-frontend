@@ -1,5 +1,5 @@
 // 최종 결제 화면
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrder } from '../contexts/OrderContext';
 import speechService from '../services/SpeechService';
@@ -9,6 +9,8 @@ import '../components/Button.css';
 // 결제 완료 이후 로직 추가 필요
 // 결제하기 라고 말하면 결제가 진행되어야 함
 // 기프티콘 결제 시 차액은 카드, 모바일 결제 중 선택해서 결제가 가능하도록
+const LOADING_GIF_FILES = ['Loading01.gif', 'Loading02.gif', 'Loading03.gif'];
+
 const CheckoutView = () => {
   const navigate = useNavigate();
   const {
@@ -35,6 +37,11 @@ const CheckoutView = () => {
   const [paymentAnimationSubText, setPaymentAnimationSubText] = useState('');
   const [showTicketNumber, setShowTicketNumber] = useState(false);
   const [ticketNumber, setTicketNumber] = useState('');
+  const [showPreparationNotice, setShowPreparationNotice] = useState(false);
+  const [preparationMainText, setPreparationMainText] = useState('');
+  const [preparationSubText, setPreparationSubText] = useState('');
+  const [preparationGuideText, setPreparationGuideText] = useState('');
+  const [preparationGifSrc, setPreparationGifSrc] = useState('');
   const paymentAnimationTimers = useRef([]);
   const hasInitialized = useRef(false);
   const isPaymentCompleted = useRef(false); // 결제 완료 상태 추적
@@ -159,6 +166,18 @@ const CheckoutView = () => {
     };
   }, [orderItems, totalPrice, setStage, addChatMessage, setListening, setTranscript, navigate, handleVoiceInput]);
 
+  const assetsBaseUrl = useMemo(() => process.env.PUBLIC_URL || '', []);
+
+  const loadingGifOptions = useMemo(
+    () => LOADING_GIF_FILES.map((file) => `${assetsBaseUrl}/assets/${file}`),
+    [assetsBaseUrl]
+  );
+
+  const getRandomLoadingGif = useCallback(() => {
+    const randomIndex = Math.floor(Math.random() * loadingGifOptions.length);
+    return loadingGifOptions[randomIndex];
+  }, [loadingGifOptions]);
+
   const handleProceed = () => { // 결제하기 버튼 클릭 시 결제 진행중이라는 로딩 진행 이후 결제 완료 주문이 완료되었습니다와 함께 번호표 발급 안내 필요
     if (isPaymentAnimating) return;
 
@@ -172,6 +191,10 @@ const CheckoutView = () => {
     setIsPaymentAnimating(true);
     setShowPaymentOverlay(true);
     setPaymentAnimationPhase('prompt');
+    setShowPreparationNotice(false);
+    setPreparationMainText('');
+    setPreparationSubText('');
+    setPreparationGuideText('');
 
     const isMobilePayment = paymentMethod === 'mobile';
     const isGiftCardPayment = paymentMethod === 'giftcard';
@@ -201,7 +224,7 @@ const CheckoutView = () => {
         setPaymentAnimationPhase('completed');
         setPaymentAnimationText('결제가 완료되었습니다.');
         setPaymentAnimationSubText('주문이 완료되었습니다. 번호표를 확인해주세요.');
-        speechService.speak('결제가 완료되었습니다. 주문이 완료되었습니다. 번호표를 확인해주세요.');
+        speechService.speak('주문이 완료되었습니다. 번호표를 확인해주세요.');
         
         // 임의의 번호표 생성 및 표시
         const randomTicketNumber = Math.floor(Math.random() * 900) + 100; // 100-999 사이의 번호
@@ -212,6 +235,15 @@ const CheckoutView = () => {
         paymentAnimationTimers.current.push(
           setTimeout(() => {
             setShowTicketNumber(false);
+            setShowPreparationNotice(true);
+            setPaymentAnimationPhase('preparing');
+            setPaymentAnimationText('');
+            setPaymentAnimationSubText('');
+            setPreparationMainText('메뉴를 준비 중입니다.');
+            setPreparationSubText('조금만 기다려주시면 따뜻한 메뉴로 안내드릴게요.');
+            setPreparationGuideText('번호 호출 시 수령대 앞으로 이동해 주문하신 메뉴를 수령해주세요.');
+            setPreparationGifSrc(getRandomLoadingGif());
+            speechService.speak('번호 안내가 모두 끝났습니다. 주문하신 메뉴를 준비 중이니 잠시만 기다려주세요. 메뉴가 완성되면 수령대에서 안내드릴게요.');
           }, 4000)
         );
       }, 3600)
@@ -224,6 +256,10 @@ const CheckoutView = () => {
         setPaymentAnimationPhase('idle');
         setPaymentAnimationText('');
         setPaymentAnimationSubText('');
+        setShowPreparationNotice(false);
+        setPreparationMainText('');
+        setPreparationSubText('');
+        setPreparationGuideText('');
         
         // 주문을 비우기 전에 '결제 완료됨'으로 플래그 설정
         isPaymentCompleted.current = true; 
@@ -232,7 +268,7 @@ const CheckoutView = () => {
         setPaymentMethod(null);
         
         navigate('/kiosk'); 
-      }, 6200)
+      }, 13500)
     );
   };
 
@@ -285,71 +321,89 @@ const CheckoutView = () => {
 
         {showPaymentOverlay && (
           <div className={`payment-progress-overlay ${paymentAnimationPhase}`}>
-            <div className="payment-progress-card">
-              <div className="payment-device-wrapper">
-                {paymentMethod === 'mobile' ? (
-                  <div className="mobile-payment-visual">
-                    {/* 모바일 결제 시 삼성페이 혹은 애플페이 인식 시 */}
-                    <div className="mobile-device">
-                      <div className="mobile-screen" />
-                      <div className="mobile-wave wave-1" />
-                      <div className="mobile-wave wave-2" />
-                      <div className="mobile-wave wave-3" />
-                    </div>
-                    <div className="nfc-reader">
-                      <div className="reader-light" />
-                      <div className="reader-base" />
-                    </div>
+            {showPreparationNotice ? (
+              <div className="preparation-overlay-card">
+                <img
+                  src={preparationGifSrc || `${assetsBaseUrl}/assets/Loading01.gif` || `${assetsBaseUrl}/assets/Loading02.gif` || `${assetsBaseUrl}/assets/Loading03.gif`}
+                  alt="메뉴 준비중 애니메이션"
+                  className="preparation-gif large"
+                />
+                <div className="preparation-text-block">
+                  <p className="preparation-main-text">{preparationMainText}</p>
+                  <p className="preparation-sub-text">{preparationSubText}</p>
+                  <div className="pickup-guide">
+                    <p className="pickup-guide-title">메뉴 수령 안내</p>
+                    <p className="pickup-guide-body">{preparationGuideText}</p>
                   </div>
-                ) : paymentMethod === 'giftcard' ? (
-                  <div className={`giftcard-payment-visual ${paymentAnimationPhase}`}>
-                    <div className="giftcard-display">
-                      <div className="giftcard-header">
-                        <span className="giftcard-title">GIFT ICON</span>
-                        <span className="giftcard-amount">{finalPrice.toLocaleString()}원</span>
-                      </div>
-                      <div className="giftcard-body">
-                        <div className="giftcard-code">GIFT-{(finalPrice % 1000000).toString().padStart(6, '0')}</div>
-                        <div className="giftcard-barcode" />
-                      </div>
-                      <div className="giftcard-ribbon" />
-                    </div>
-                    <div className="giftcard-scanner">
-                      <div className="scanner-window">
-                        <div className="scanner-line" />
-                        <div className="scanner-code" />
-                      </div>
-                      <div className="scanner-base" />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="card-payment-visual">
-                    {/* 카드 결제 시 */}
-                    <div className="terminal-body">
-                      <div className="terminal-screen" />
-                      <div className="terminal-slot" />
-                    </div>
-                    <div className={`credit-card ${paymentAnimationPhase}`}>
-                      <div className="card-chip" />
-                      <div className="card-number" />
-                      <div className="card-name" />
-                    </div>
-                  </div>
-                )}
+                </div>
               </div>
-              <div className="payment-progress-text">
-                <p className="progress-main-text">{paymentAnimationText}</p>
-                <p className={`progress-sub-text ${paymentAnimationPhase === 'completed' ? 'completed' : ''}`}>
-                  {paymentAnimationSubText}
-                </p>
-                {showTicketNumber && (
-                  <div className="ticket-number-display">
-                    <div className="ticket-number-label">번호표</div>
-                    <div className="ticket-number-value">{ticketNumber}</div>
-                  </div>
-                )}
+            ) : (
+              <div className="payment-progress-card">
+                <div className="payment-device-wrapper">
+                  {paymentMethod === 'mobile' ? (
+                    <div className="mobile-payment-visual">
+                      {/* 모바일 결제 시 삼성페이 혹은 애플페이 인식 시 */}
+                      <div className="mobile-device">
+                        <div className="mobile-screen" />
+                        <div className="mobile-wave wave-1" />
+                        <div className="mobile-wave wave-2" />
+                        <div className="mobile-wave wave-3" />
+                      </div>
+                      <div className="nfc-reader">
+                        <div className="reader-light" />
+                        <div className="reader-base" />
+                      </div>
+                    </div>
+                  ) : paymentMethod === 'giftcard' ? (
+                    <div className={`giftcard-payment-visual ${paymentAnimationPhase}`}>
+                      <div className="giftcard-display">
+                        <div className="giftcard-header">
+                          <span className="giftcard-title">GIFT ICON</span>
+                          <span className="giftcard-amount">{finalPrice.toLocaleString()}원</span>
+                        </div>
+                        <div className="giftcard-body">
+                          <div className="giftcard-code">GIFT-{(finalPrice % 1000000).toString().padStart(6, '0')}</div>
+                          <div className="giftcard-barcode" />
+                        </div>
+                        <div className="giftcard-ribbon" />
+                      </div>
+                      <div className="giftcard-scanner">
+                        <div className="scanner-window">
+                          <div className="scanner-line" />
+                          <div className="scanner-code" />
+                        </div>
+                        <div className="scanner-base" />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="card-payment-visual">
+                      {/* 카드 결제 시 */}
+                      <div className="terminal-body">
+                        <div className="terminal-screen" />
+                        <div className="terminal-slot" />
+                      </div>
+                      <div className={`credit-card ${paymentAnimationPhase}`}>
+                        <div className="card-chip" />
+                        <div className="card-number" />
+                        <div className="card-name" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="payment-progress-text">
+                  <p className="progress-main-text">{paymentAnimationText}</p>
+                  <p className={`progress-sub-text ${paymentAnimationPhase === 'completed' ? 'completed' : ''}`}>
+                    {paymentAnimationSubText}
+                  </p>
+                  {showTicketNumber && (
+                    <div className="ticket-number-display">
+                      <div className="ticket-number-label">번호표</div>
+                      <div className="ticket-number-value">{ticketNumber}</div>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
       </div>

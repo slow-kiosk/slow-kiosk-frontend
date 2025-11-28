@@ -5,6 +5,8 @@ class SpeechService {
     this.synthesis = window.speechSynthesis;
     this.isListening = false;
     this.shouldContinueListening = false;
+    this.isPausedForTTS = false;
+    this.shouldResumeAfterTTS = false;
     this.permissionDenied = false; // 마이크 권한 거부 여부
     this.onResultCallback = null;
     this.onErrorCallback = null;
@@ -113,6 +115,10 @@ class SpeechService {
       this.recognition.onend = () => {
         console.log('음성 인식이 종료되었습니다.');
         this.isListening = false;
+        // TTS로 인해 일시 중지된 경우 자동 재시작을 건너뜁니다.
+        if (this.isPausedForTTS) {
+          return;
+        }
         // 의도적으로 끈 게 아니라면(shouldContinueListening === true), 다시 켭니다.
         if (this.shouldContinueListening && !this.permissionDenied) {
           console.log('음성 인식을 재시작합니다...');
@@ -209,6 +215,44 @@ class SpeechService {
     }
   }
 
+  pauseRecognitionForTTS() {
+    if (!this.recognition) {
+      return;
+    }
+
+    this.shouldResumeAfterTTS = this.shouldContinueListening;
+    this.isPausedForTTS = true;
+
+    if (this.isListening) {
+      try {
+        this.recognition.stop();
+      } catch (error) {
+        console.warn('TTS 중지용 마이크 스톱 실패:', error);
+      }
+      this.isListening = false;
+    }
+  }
+
+  resumeRecognitionAfterTTS() {
+    if (!this.recognition) {
+      this.isPausedForTTS = false;
+      this.shouldResumeAfterTTS = false;
+      return;
+    }
+
+    if (!this.isPausedForTTS) {
+      return;
+    }
+
+    const shouldResume = this.shouldResumeAfterTTS && !this.permissionDenied;
+    this.isPausedForTTS = false;
+    this.shouldResumeAfterTTS = false;
+
+    if (shouldResume) {
+      this.start(true);
+    }
+  }
+
   onResult(callback) {
     this.onResultCallback = callback;
   }
@@ -279,6 +323,9 @@ class SpeechService {
 
   _doSpeak(text, options = {}) {
 
+    // TTS 출력 동안 음성 인식을 일시 중지하여 자기 목소리를 인식하지 않도록 함
+    this.pauseRecognitionForTTS();
+
     const utterance = new SpeechSynthesisUtterance(text);
     
     // 목소리 설정 (없으면 시스템 기본값 사용)
@@ -297,6 +344,7 @@ class SpeechService {
 
     // [중요] 말하기가 끝나면 onEnd 실행 -> 여기서 보통 this.start()가 호출됨
     utterance.onend = () => {
+      this.resumeRecognitionAfterTTS();
       if (options.onEnd) {
         options.onEnd();
       }
@@ -315,6 +363,7 @@ class SpeechService {
         this.synthesis.cancel();
         // 에러 발생 시에도 흐름이 끊기지 않게 onEnd 호출
         if (options.onEnd) options.onEnd();
+        this.resumeRecognitionAfterTTS();
       }
       
       if (options.onError) {

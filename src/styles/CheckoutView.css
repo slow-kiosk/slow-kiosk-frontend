@@ -364,7 +364,7 @@
 .giftcard-header {
   display: flex;
   justify-content: space-between;
-  font-size: calc(18px * var(--font-size-multiplier));
+  font-size: 18px;
   font-weight: 700;
 }
 
@@ -378,7 +378,7 @@
 
 .giftcard-code {
   font-family: 'Courier New', monospace;
-  font-size: calc(20px * var(--font-size-multiplier));
+  font-size: 20px;
   letter-spacing: 2px;
   margin-bottom: 10px;
 }
@@ -456,13 +456,13 @@
 }
 
 .payment-progress-text .progress-main-text {
-  font-size: calc(28px * var(--font-size-multiplier));
+  font-size: 28px;
   font-weight: 700;
   margin-bottom: 10px;
 }
 
 .payment-progress-text .progress-sub-text {
-  font-size: calc(22px * var(--font-size-multiplier));
+  font-size: 22px;
   color: #555;
   transition: color 0.3s ease;
 }
@@ -482,19 +482,130 @@
 }
 
 .ticket-number-label {
-  font-size: calc(20px * var(--font-size-multiplier));
+  font-size: 20px;
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 12px;
   font-weight: 600;
 }
 
 .ticket-number-value {
-  font-size: calc(72px * var(--font-size-multiplier));
+  font-size: 72px;
   font-weight: 700;
   color: #fff;
   text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   letter-spacing: 4px;
   animation: ticketPulse 1s ease-in-out infinite;
+}
+
+.preparation-notice {
+  margin-top: 32px;
+  padding: 24px;
+  border-radius: 24px;
+  background: #f6f7fb;
+  border: 1px solid rgba(91, 99, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.preparation-gif {
+  width: 140px;
+  height: 140px;
+  border-radius: 24px;
+  object-fit: cover;
+  background: #fff;
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.preparation-text {
+  text-align: left;
+  flex: 1;
+}
+
+.preparation-main-text {
+  font-size: 26px;
+  font-weight: 700;
+  color: #181c42;
+  margin: 0 0 8px 0;
+}
+
+.preparation-sub-text {
+  font-size: 20px;
+  color: #5a5f87;
+  margin: 0 0 16px 0;
+}
+
+.pickup-guide {
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: #fff;
+  border: 1px dashed rgba(91, 99, 255, 0.5);
+}
+
+.pickup-guide-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #5b63ff;
+  margin: 0 0 6px 0;
+}
+
+.pickup-guide-body {
+  font-size: 18px;
+  color: #2d325b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.preparation-overlay-card {
+  width: min(700px, 90%);
+  background: #fff;
+  border-radius: 32px;
+  padding: 48px;
+  box-shadow: 0 35px 70px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  text-align: center;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.preparation-gif.large {
+  width: 300px;
+  height: 300px;
+  border-radius: 36px;
+  object-fit: cover;
+  background: #fff;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+}
+
+.preparation-text-block {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  text-align: center;
+}
+
+.preparation-overlay-card .preparation-main-text {
+  font-size: calc(46px * var(--font-size-multiplier, 1));
+  line-height: 1.35;
+}
+
+.preparation-overlay-card .preparation-sub-text {
+  font-size: calc(32px * var(--font-size-multiplier, 1));
+  color: #3a3f6a;
+  line-height: 1.45;
+}
+
+.preparation-overlay-card .pickup-guide-title {
+  font-size: calc(30px * var(--font-size-multiplier, 1));
+}
+
+.preparation-overlay-card .pickup-guide-body {
+  font-size: calc(26px * var(--font-size-multiplier, 1));
+  line-height: 1.5;
 }
 
 @keyframes ticketAppear {
@@ -574,8 +685,3 @@
   0% { top: -10%; }
   100% { top: 100%; }
 }
-
-
-
-
-
