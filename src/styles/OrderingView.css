@@ -38,6 +38,14 @@
   min-height: 0; /* flex 아이템이 축소될 수 있도록*/
 }
 
+.section-title {
+  font-size: calc(32px * var(--font-size-multiplier, 1));
+  font-weight: 700;
+  color: var(--text-primary, #333);
+  margin-bottom: 24px;
+  margin-top: 0;
+}
+
 .menu-loading {
   display: flex;
   flex-direction: column;
@@ -60,8 +68,8 @@
 
 .menu-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
   overflow-y: auto;
   overflow-x: hidden;
   flex: 1;
@@ -70,9 +78,9 @@
   padding-right: 10px;
   flex: 1;
   min-height: 0;
-  --menu-card-height: 300px;
+  --menu-card-height: 350px;
   grid-auto-rows: var(--menu-card-height);
-  max-height: calc((var(--menu-card-height) * 2) + 20px);
+  max-height: calc((var(--menu-card-height) * 2) + 24px);
 }
 
 .menu-grid::-webkit-scrollbar {
@@ -114,7 +122,7 @@
 
 .menu-card-image {
   width: 100%;
-  height: 180px;
+  height: 220px;
   overflow: hidden;
   background: #f5f5f5;
   display: flex;
@@ -163,11 +171,32 @@
 }
 
 .menu-card-info {
-  padding: 16px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   flex: 1;
+}
+
+.menu-card-name {
+  font-size: calc(28px * var(--font-size-multiplier, 1));
+  font-weight: 600;
+  color: var(--text-primary, #333);
+  margin: 0;
+}
+
+.menu-card-description {
+  font-size: calc(20px * var(--font-size-multiplier, 1));
+  color: var(--text-secondary, #666);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.menu-card-price {
+  font-size: calc(24px * var(--font-size-multiplier, 1));
+  font-weight: 700;
+  color: var(--primary-purple, #1976d2);
+  margin-top: auto;
 }
 
 

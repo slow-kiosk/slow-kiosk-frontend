@@ -25,10 +25,10 @@
 }
 
 .chat-message {
-  max-width: 70%;
-  padding: 20px 25px;
+  max-width: 80%;
+  padding: 28px 35px;
   border-radius: 20px;
-  font-size: 24px;
+  font-size: 32px;
   line-height: 1.6;
   word-wrap: break-word;
 }
@@ -55,7 +55,7 @@
 
 .chat-message-media img {
   display: block;
-  max-width: 260px;
+  max-width: 350px;
   width: 100%;
   height: auto;
   object-fit: cover;
@@ -102,11 +102,11 @@
 }
 
 .suggestion-button {
-  padding: 12px 20px;
+  padding: 16px 28px;
   background: white;
   border: 2px solid #1976d2;
   border-radius: 25px;
-  font-size: 20px;
+  font-size: 26px;
   color: #1976d2;
   cursor: pointer;
   transition: all 0.3s ease;

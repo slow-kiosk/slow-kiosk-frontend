@@ -8,6 +8,7 @@ import '../components/Button.css';
 
 // 결제 완료 이후 로직 추가 필요
 // 결제하기 라고 말하면 결제가 진행되어야 함
+// 기프티콘 결제 시 차액은 카드, 모바일 결제 중 선택해서 결제가 가능하도록
 const CheckoutView = () => {
   const navigate = useNavigate();
   const {
@@ -15,6 +16,7 @@ const CheckoutView = () => {
     totalPrice,
     discount,
     finalPrice,
+    giftCardInfo,
     setGiftCard,
     setStage,
     addChatMessage,
@@ -31,25 +33,14 @@ const CheckoutView = () => {
   const [paymentAnimationPhase, setPaymentAnimationPhase] = useState('idle');
   const [paymentAnimationText, setPaymentAnimationText] = useState('');
   const [paymentAnimationSubText, setPaymentAnimationSubText] = useState('');
+  const [showTicketNumber, setShowTicketNumber] = useState(false);
+  const [ticketNumber, setTicketNumber] = useState('');
   const paymentAnimationTimers = useRef([]);
   const hasInitialized = useRef(false);
   const isPaymentCompleted = useRef(false); // 결제 완료 상태 추적
 
   const handleApplyCode = useCallback(async (code) => {
     try {
-      // if (code.startsWith('COUPON') || code.length === 6) {
-      //   setCoupon(code);
-      //   const discountAmount = Math.floor(totalPrice * 0.1); // 10% 할인 예시
-      //   applyDiscount(discountAmount);
-        
-      //   const message = {
-      //     role: 'assistant',
-      //     content: `쿠폰이 적용되었습니다. ${discountAmount.toLocaleString()}원 할인되었습니다. 최종 금액은 ${finalPrice.toLocaleString()}원입니다.`,
-      //     suggestions: ['결제하기']
-      //   };
-      //   addChatMessage(message);
-      //   speechService.speak(message.content);
-      //}
       if (code.startsWith('GIFT') || code.length === 8) {
         setGiftCard(code);
         const message = {
@@ -210,7 +201,19 @@ const CheckoutView = () => {
         setPaymentAnimationPhase('completed');
         setPaymentAnimationText('결제가 완료되었습니다.');
         setPaymentAnimationSubText('주문이 완료되었습니다. 번호표를 확인해주세요.');
-        speechService.speak('결제가 완료되었습니다. 주문이 완료되었습니다.');
+        speechService.speak('결제가 완료되었습니다. 주문이 완료되었습니다. 번호표를 확인해주세요.');
+        
+        // 임의의 번호표 생성 및 표시
+        const randomTicketNumber = Math.floor(Math.random() * 900) + 100; // 100-999 사이의 번호
+        setTicketNumber(randomTicketNumber.toString());
+        setShowTicketNumber(true);
+        
+        // 4초 후 번호표 숨기기
+        paymentAnimationTimers.current.push(
+          setTimeout(() => {
+            setShowTicketNumber(false);
+          }, 4000)
+        );
       }, 3600)
     );
 
@@ -257,6 +260,12 @@ const CheckoutView = () => {
                 <div className="price-row discount-row">
                   <span>할인 금액</span>
                   <span>-{discount.toLocaleString()}원</span>
+                </div>
+              )}
+              {giftCardInfo && giftCardInfo.price > 0 && (
+                <div className="price-row discount-row">
+                  <span>기프티콘 할인 ({giftCardInfo.menuName})</span>
+                  <span>-{giftCardInfo.price.toLocaleString()}원</span>
                 </div>
               )}
               <div className="price-row total-row">
@@ -333,6 +342,12 @@ const CheckoutView = () => {
                 <p className={`progress-sub-text ${paymentAnimationPhase === 'completed' ? 'completed' : ''}`}>
                   {paymentAnimationSubText}
                 </p>
+                {showTicketNumber && (
+                  <div className="ticket-number-display">
+                    <div className="ticket-number-label">번호표</div>
+                    <div className="ticket-number-value">{ticketNumber}</div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

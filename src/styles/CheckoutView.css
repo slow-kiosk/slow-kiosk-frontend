@@ -472,6 +472,51 @@
   animation: textPulse 1.2s ease infinite;
 }
 
+.ticket-number-display {
+  margin-top: 30px;
+  padding: 30px;
+  background: linear-gradient(135deg, #5b63ff, #8f9eff);
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(91, 99, 255, 0.3);
+  animation: ticketAppear 0.5s ease forwards;
+}
+
+.ticket-number-label {
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.ticket-number-value {
+  font-size: 72px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  letter-spacing: 4px;
+  animation: ticketPulse 1s ease-in-out infinite;
+}
+
+@keyframes ticketAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes ticketPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
