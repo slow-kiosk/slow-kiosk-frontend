@@ -11,13 +11,8 @@ import '../components/Text.css';
 import '../components/Button.css'; 
 
 // 음성 인식 실패 시 다시 음성 요청하는 메세지 출력
-// 메뉴판 이미지 및 사진 더 크게 보여주도록
-// 주문 내역이라는 음성을 말하면 주문 내역 OrderListView로 이동
 
-// 무조건 음성 응답을 반환하도록 / 챗봇 응답 출력 시 작성되는 모션 보이도록 기능 추가 필요
 // 영양성분 질문 테스트 재진행 필요
-// 사용자가 메뉴 요청하면 메뉴가 맞는지 확인하는 메뉴 사진 이미지 출력
-// 주문 완료 라고 음성으로 말할 경우 CheckoutView로 이동 
 const OrderingView = () => {
   const navigate = useNavigate();
   const {
@@ -43,6 +38,20 @@ const OrderingView = () => {
     navigate('/order-list');
   }, [setStage, navigate]);
 
+  const handleCompleteOrder = useCallback(() => {
+    if (orderItems.length === 0) {
+      const message = {
+        role: 'assistant',
+        content: '주문하실 메뉴를 먼저 말씀해주세요.',
+        suggestions: []
+      };
+      addChatMessage(message);
+      speechService.speak(message.content);
+      return;
+    }
+    navigate('/checkout');
+  }, [orderItems, addChatMessage, navigate]);
+
   const handleVoiceInput = useCallback(async (text) => {
     if (isProcessing || !text.trim()) return;
     
@@ -60,6 +69,14 @@ const OrderingView = () => {
     if (normalizedText.includes('주문 내역') || normalizedText.includes('주문내역')) {
       setIsProcessing(false);
       handleOrderList();
+      return;
+    }
+
+    // "주문 완료" 음성 인식 처리
+    const normalizedText2 = text.trim().toLowerCase();
+    if (normalizedText2.includes('주문 완료') || normalizedText2.includes('주문완료')) {
+      setIsProcessing(false);
+      handleCompleteOrder();
       return;
     }
 
@@ -120,7 +137,7 @@ const OrderingView = () => {
     } finally {
       setIsProcessing(false);
     }
-  }, [isProcessing, orderItems, menus, addItem, addChatMessage, navigate, handleOrderList]);
+  }, [isProcessing, orderItems, menus, addItem, addChatMessage, navigate, handleOrderList, handleCompleteOrder]);
 
   // 메뉴 데이터 가져오기
   useEffect(() => {
@@ -206,20 +223,6 @@ const OrderingView = () => {
 
   const handleSuggestionClick = (suggestion) => {
     handleVoiceInput(suggestion);
-  };
-
-  const handleCompleteOrder = () => {
-    if (orderItems.length === 0) {
-      const message = {
-        role: 'assistant',
-        content: '주문하실 메뉴를 먼저 말씀해주세요.',
-        suggestions: []
-      };
-      addChatMessage(message);
-      speechService.speak(message.content);
-      return;
-    }
-    navigate('/checkout');
   };
 
   const handleMenuClick = (menu) => {

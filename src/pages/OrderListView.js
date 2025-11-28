@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrder } from '../contexts/OrderContext';
+import speechService from '../services/SpeechService';
 import '../styles/OrderListView.css';
 
 
@@ -8,14 +9,66 @@ import '../styles/OrderListView.css';
 // 주문 내역 UI 수정 필요
 const OrderListView = () => {
   const navigate = useNavigate();
-  const { orderItems, totalPrice, discount, finalPrice } = useOrder();
-
-  const isProcessing = false;
+  const { orderItems, totalPrice, discount, finalPrice, setListening, setTranscript, setStage } = useOrder();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // 주문 페이지로 돌아가기
-  const handleBackToOrdering = () => {
+  const handleBackToOrdering = useCallback(() => {
     navigate('/ordering');
-  };
+  }, [navigate]);
+
+  // "주문 계속하기" 음성 인식 처리
+  const handleVoiceInput = useCallback((text) => {
+    if (isProcessing || !text.trim()) return;
+    
+    setIsProcessing(true);
+    
+    const normalizedText = text.trim().toLowerCase();
+    if (normalizedText.includes('주문 계속하기') || normalizedText.includes('주문계속하기')) {
+      setIsProcessing(false);
+      handleBackToOrdering();
+      return;
+    }
+    
+    setIsProcessing(false);
+  }, [isProcessing, handleBackToOrdering]);
+
+  // 음성 인식 설정
+  useEffect(() => {
+    setStage('order-list');
+    speechService.setTestVoiceInputHandler(handleVoiceInput);
+
+    speechService.onResult((result) => {
+      if (result.final) {
+        setTranscript(result.final);
+        handleVoiceInput(result.final);
+      } else {
+        setTranscript(result.interim);
+      }
+    });
+
+    speechService.onError((error) => {
+      console.error('음성 인식 오류:', error);
+      if (error !== 'no-speech') {
+        speechService.logTestCodeInstructions();
+      }
+    });
+
+    if (!speechService.isListening) {
+      try {
+        speechService.start(true);
+        setListening(true);
+      } catch (e) {
+        console.log("이미 마이크가 켜져 있습니다.");
+      }
+    }
+
+    return () => {
+      speechService.stop();
+      setListening(false);
+      speechService.clearTestVoiceInputHandler();
+    };
+  }, [handleVoiceInput, setStage, setListening, setTranscript]);
 
   return (
     <div className="order-list-view">
