@@ -364,7 +364,7 @@
 .giftcard-header {
   display: flex;
   justify-content: space-between;
-  font-size: 18px;
+  font-size: calc(18px * var(--font-size-multiplier));
   font-weight: 700;
 }
 
@@ -378,7 +378,7 @@
 
 .giftcard-code {
   font-family: 'Courier New', monospace;
-  font-size: 20px;
+  font-size: calc(20px * var(--font-size-multiplier));
   letter-spacing: 2px;
   margin-bottom: 10px;
 }
@@ -456,13 +456,13 @@
 }
 
 .payment-progress-text .progress-main-text {
-  font-size: 28px;
+  font-size: calc(28px * var(--font-size-multiplier));
   font-weight: 700;
   margin-bottom: 10px;
 }
 
 .payment-progress-text .progress-sub-text {
-  font-size: 22px;
+  font-size: calc(22px * var(--font-size-multiplier));
   color: #555;
   transition: color 0.3s ease;
 }
@@ -482,14 +482,14 @@
 }
 
 .ticket-number-label {
-  font-size: 20px;
+  font-size: calc(20px * var(--font-size-multiplier));
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 12px;
   font-weight: 600;
 }
 
 .ticket-number-value {
-  font-size: 72px;
+  font-size: calc(72px * var(--font-size-multiplier));
   font-weight: 700;
   color: #fff;
   text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);

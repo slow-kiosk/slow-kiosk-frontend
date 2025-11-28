@@ -1,5 +1,39 @@
 :root {
   --font-size-multiplier: 1;
+  
+  /* 기본 색상 변수 (Design Tokens) */
+  --bg-color: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --text-primary: #1a1a1a;
+  --text-secondary: #666666;
+  --text-light: #ffffff;
+  --border-color: #e0e0e0;
+  --primary-color: #667eea;
+  --accent-color: #f5576c;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --surface-panel: #ffffff;
+  --surface-card: #ffffff;
+  --surface-muted: #f5f5f5;
+  --surface-chat: #fafafa;
+  --surface-highlight: #e3f2fd;
+}
+
+/* 고대비 테마 (명도 대비 4.5:1 이상) */
+:root.high-contrast {
+  --bg-color: #000000;
+  --bg-secondary: #000000;
+  --text-primary: #ffffff;
+  --text-secondary: #ffffff;
+  --text-light: #000000;
+  --border-color: #ffff00;
+  --primary-color: #ffff00;
+  --accent-color: #ffff00;
+  --shadow-color: rgba(255, 255, 0, 0.5);
+  --surface-panel: #000000;
+  --surface-card: #000000;
+  --surface-muted: #000000;
+  --surface-chat: #000000;
+  --surface-highlight: #000000;
 }
 
 body {
@@ -10,6 +44,31 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: calc(16px * var(--font-size-multiplier));
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 고대비 모드에서 그림자와 그라데이션 제거 (선택적) */
+:root.high-contrast {
+  /* 그라데이션 배경을 단색으로 변경 */
+  --primary-gradient: var(--primary-color);
+  --accent-gradient: var(--accent-color);
+  --bg-gradient: var(--bg-color);
+  --bg-selected: var(--bg-secondary);
+}
+
+:root.high-contrast * {
+  /* 그림자 제거로 시인성 향상 */
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* 고대비 모드에서 배경 이미지 제거 */
+:root.high-contrast [style*="background-image"],
+:root.high-contrast [class*="gradient"] {
+  background-image: none !important;
+  background-color: var(--bg-color) !important;
 }
 
 code {

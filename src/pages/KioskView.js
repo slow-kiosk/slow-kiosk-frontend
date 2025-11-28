@@ -1,5 +1,5 @@
 // 메인 화면 - 주문 시작
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrder } from '../contexts/OrderContext';
 import speechService from '../services/SpeechService';
@@ -7,16 +7,39 @@ import '../styles/KioskView.css';
 import '../components/Text.css';
 import '../components/Button.css';
 
-// 주문 시작하기 말로도 사용 가능하도록
+// 사용자 맞춤 버튼 css 친근하게 수정
+// 기본 / 느린 키오스크 모드 추가
 const KioskView = () => {
   const navigate = useNavigate();
   const { clearOrder, setStage } = useOrder();
+  const [selectedMode, setSelectedMode] = useState(null);
+  const [showModeSelection, setShowModeSelection] = useState(true);
 
   useEffect(() => {
     // 페이지 진입 시 주문 초기화
     clearOrder();
     setStage('kiosk');
   }, [clearOrder, setStage]);
+
+  const handleModeSelection = (mode) => {
+    setSelectedMode(mode);
+
+    if (mode === 'slow') {
+      setShowModeSelection(false);
+      if (speechService.isSupported()) {
+        speechService.speak('느린 키오스크 모드를 선택하셨어요. 천천히 도와드릴게요.');
+      }
+      return;
+    }
+
+    setStage('ordering');
+    navigate('/ordering');
+  };
+
+  const handleResetModeSelection = () => {
+    setSelectedMode(null);
+    setShowModeSelection(true);
+  };
 
   const handlePayment = () => {
     setStage('payment');
@@ -29,7 +52,64 @@ const KioskView = () => {
 
   return (
     <div className="kiosk-view">
+      {showModeSelection && (
+        <div className="mode-selection-backdrop" role="presentation">
+          <div
+            className="mode-selection-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mode-selection-heading"
+          >
+            <p className="mode-selection-label">시작 전에 어떤 모드로 주문할까요?</p>
+            <h2 id="mode-selection-heading">원하는 키오스크 모드를 선택해주세요</h2>
+            <div className="mode-options">
+              <button
+                type="button"
+                className={`mode-card slow ${selectedMode === 'slow' ? 'selected' : ''}`}
+                onClick={() => handleModeSelection('slow')}
+              >
+                <span className="mode-icon" aria-hidden="true">🐢</span>
+                <span className="mode-title">느린 키오스크</span>
+                <span className="mode-description">
+                  큰 글자와 음성 안내로 천천히 주문을 도와드려요.
+                </span>
+                <span className="mode-hint">추천</span>
+              </button>
+              <button
+                type="button"
+                className={`mode-card standard ${selectedMode === 'standard' ? 'selected' : ''}`}
+                onClick={() => handleModeSelection('standard')}
+              >
+                <span className="mode-icon" aria-hidden="true">⚡</span>
+                <span className="mode-title">일반 키오스크</span>
+                <span className="mode-description">
+                  익숙한 속도로 바로 주문 화면으로 이동합니다.
+                </span>
+                <span className="mode-hint">빠른 주문</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="kiosk-main-content">
+        {/* {!showModeSelection && (
+          <div className="mode-reset-banner" role="status" aria-live="polite">
+            <div className="mode-reset-copy">
+              <span className="mode-reset-icon" aria-hidden="true">🔄</span>
+              <div className="mode-reset-text">
+                <p className="mode-reset-title">느린 키오스크 모드가 켜져 있어요</p>
+                <p className="mode-reset-description">필요하면 다른 모드로 금방 바꿀 수 있어요.</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="mode-reset-button"
+              onClick={handleResetModeSelection}
+            >
+              다른 모드로 다시 선택하기
+            </button>
+          </div>
+        )} */}
         <div className="welcome-section">
           <h1 className="main-title">느린 키오스크</h1>
           <p className="subtitle">음성으로 편리하게 주문하세요</p>
@@ -66,8 +146,15 @@ const KioskView = () => {
         type="button"
         className="global-settings-button"
         onClick={handleOpenGlobalSettings}
+        aria-label="사용자 맞춤 설정 열기"
       >
-        사용자 맞춤
+        <span className="global-settings-icon" aria-hidden="true">
+          ⚙️
+        </span>
+        <span className="global-settings-copy">
+          <span className="global-settings-title">사용자 맞춤</span>
+          <span className="global-settings-caption">글자·색상·휠체어 모드</span>
+        </span>
       </button>
     </div>
   );
