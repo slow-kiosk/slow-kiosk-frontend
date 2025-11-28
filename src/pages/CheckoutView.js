@@ -7,7 +7,7 @@ import '../styles/CheckoutView.css';
 import '../components/Button.css';
 
 // 결제 완료 이후 로직 추가 필요
-
+// 결제하기 라고 말하면 결제가 진행되어야 함
 const CheckoutView = () => {
   const navigate = useNavigate();
   const {

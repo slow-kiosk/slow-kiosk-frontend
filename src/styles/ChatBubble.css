@@ -41,6 +41,42 @@
   min-height: 56px;
 }
 
+.chat-message.typing-text {
+  position: relative;
+}
+
+.chat-message-media {
+  margin-top: 12px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.chat-message-media img {
+  display: block;
+  max-width: 260px;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.typing-cursor {
+  display: inline-block;
+  margin-left: 2px;
+  animation: blink 1s infinite;
+  font-weight: 300;
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
 .chat-bubble.user .chat-message {
   background: #1976d2;
   color: white;
