@@ -6,7 +6,7 @@
   width: 60%;
   border: none;
   padding: 25px 80px;
-  font-size: 36px;
+  font-size: calc(36px * var(--font-size-multiplier));
   font-weight: bold;
   border-radius: 50px;
   cursor: pointer;
@@ -93,7 +93,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: calc(18px * var(--font-size-multiplier));
   font-weight: bold;
 }
 
@@ -101,6 +101,32 @@
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+}
+
+:root.high-contrast .method-button {
+  background: #ffffff;
+  border-color: #000000;
+  color: #000000;
+}
+
+:root.high-contrast .method-button .method-name,
+:root.high-contrast .method-button .method-icon {
+  color: #000000;
+}
+
+:root.high-contrast .method-button.selected {
+  background: #f5f5f5;
+  border-color: #000000;
+  box-shadow: none;
+}
+
+:root.high-contrast .method-button.selected .method-name {
+  color: #000000;
+}
+
+:root.high-contrast .method-button.selected::after {
+  background: #000000;
+  color: #ffffff;
 }
 
 
@@ -111,7 +137,7 @@
   color: var(--text-light);
   border: none;
   padding: 28px 100px;
-  font-size: 32px;
+  font-size: calc(32px * var(--font-size-multiplier));
   font-weight: 700;
   border-radius: 50px;
   cursor: pointer;
@@ -143,7 +169,7 @@
 .action-button {
   flex: 1;
   padding: 25px;
-  font-size: 28px;
+  font-size: calc(28px * var(--font-size-multiplier));
   font-weight: bold;
   border: none;
   border-radius: 15px;
@@ -174,7 +200,7 @@
   border-radius: 16px;
   border: 2px solid transparent;
   background: var(--bg-light);
-  font-size: 20px;
+  font-size: calc(20px * var(--font-size-multiplier));
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -198,7 +224,7 @@
 .order-complete-button {
   width: 100%;
   padding: 20px;
-  font-size: 24px;
+  font-size: calc(24px * var(--font-size-multiplier));
   font-weight: bold;
   border: none;
   border-radius: 12px;
@@ -261,7 +287,7 @@
   color: var(--text-light);
   border: none;
   border-radius: 10px;
-  font-size: 22px;
+  font-size: calc(22px * var(--font-size-multiplier));
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;

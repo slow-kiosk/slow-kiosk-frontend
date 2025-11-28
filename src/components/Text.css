@@ -1,21 +1,22 @@
 /* 타이틀 텍스트 */
 .main-title {
-  font-size: 72px;
+  font-size: calc(82px * var(--font-size-multiplier));
   font-weight: bold;
   color: var(--text-dark);
-  margin-bottom: 20px;
+  margin-bottom: 28px;
   text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.3);
 }
 
 .subtitle {
-  font-size: 32px;
+  font-size: calc(38px * var(--font-size-multiplier));
   color: var(--text-secondary);
   font-weight: 400;
+  line-height: 1.4;
 }
 
 /* 섹션 타이틀 */
 .section-title {
-  font-size: 36px;
+  font-size: calc(36px * var(--font-size-multiplier));
   font-weight: bold;
   margin-bottom: 20px;
   color: var(--text-primary);
@@ -24,7 +25,7 @@
 
 /* PaymentView에서 사용하는 큰 섹션 타이틀 */
 .payment-header .section-title {
-  font-size: 52px;
+  font-size: calc(52px * var(--font-size-multiplier));
   font-weight: 700;
   margin: 0;
   letter-spacing: -0.5px;
@@ -33,7 +34,7 @@
 /* OrderingView에서 사용하는 섹션 타이틀 */
 .ordering-left .chat-section > .section-title,
 .ordering-view .section-title {
-  font-size: 32px;
+  font-size: calc(32px * var(--font-size-multiplier));
   margin-bottom: 24px;
   padding-bottom: 16px;
   border-bottom: 2px solid var(--border-light);
@@ -41,14 +42,14 @@
 
 /* 금액 관련 텍스트 */
 .amount-label {
-  font-size: 20px;
+  font-size: calc(20px * var(--font-size-multiplier));
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
   letter-spacing: 0.5px;
 }
 
 .amount-value {
-  font-size: 48px;
+  font-size: calc(48px * var(--font-size-multiplier));
   font-weight: 700;
   color: var(--text-light);
   letter-spacing: -1px;
@@ -56,14 +57,14 @@
 
 /* 메뉴 카드 텍스트 */
 .menu-card-name {
-  font-size: 20px;
+  font-size: calc(20px * var(--font-size-multiplier));
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
 }
 
 .menu-card-description {
-  font-size: 14px;
+  font-size: calc(14px * var(--font-size-multiplier));
   color: var(--text-secondary);
   margin: 0;
   line-height: 1.4;
@@ -75,7 +76,7 @@
 }
 
 .menu-card-price {
-  font-size: 18px;
+  font-size: calc(18px * var(--font-size-multiplier));
   font-weight: 700;
   color: var(--primary-purple);
   margin-top: auto;
@@ -83,7 +84,7 @@
 
 /* 주문 아이템 텍스트 */
 .order-item-name {
-  font-size: 20px;
+  font-size: calc(20px * var(--font-size-multiplier));
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -91,7 +92,7 @@
 .order-item-meta {
   display: flex;
   justify-content: space-between;
-  font-size: 16px;
+  font-size: calc(16px * var(--font-size-multiplier));
   color: var(--text-secondary);
 }
 
@@ -114,13 +115,13 @@
 .order-total {
   margin-top: 16px;
   text-align: right;
-  font-size: 22px;
+  font-size: calc(22px * var(--font-size-multiplier));
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .total-row {
-  font-size: 32px;
+  font-size: calc(32px * var(--font-size-multiplier));
   font-weight: bold;
   color: var(--primary-purple);
 }
@@ -132,7 +133,7 @@
 
 /* 결제 관련 텍스트 */
 .method-name {
-  font-size: 36px;
+  font-size: calc(36px * var(--font-size-multiplier));
   font-weight: 600;
   color: var(--text-primary);
   letter-spacing: -0.3px;
@@ -143,7 +144,7 @@
 }
 
 .complete-message {
-  font-size: 32px;
+  font-size: calc(32px * var(--font-size-multiplier));
   font-weight: 600;
   color: var(--text-primary);
   text-align: center;
@@ -151,7 +152,7 @@
 
 /* 폼 라벨 텍스트 */
 .input-group label {
-  font-size: 22px;
+  font-size: calc(22px * var(--font-size-multiplier));
   font-weight: 600;
   color: var(--text-primary);
 }
