@@ -26,7 +26,8 @@ const CheckoutView = () => {
     setTranscript,
     paymentMethod,
     setPaymentMethod,
-    clearOrder
+    clearOrder,
+    clearChatHistory
   } = useOrder();
 
   const [isVoiceProcessing, setIsVoiceProcessing] = useState(false);
@@ -244,9 +245,9 @@ const CheckoutView = () => {
             setPreparationGuideText('번호 호출 시 수령대 앞으로 이동해 주문하신 메뉴를 수령해주세요.');
             setPreparationGifSrc(getRandomLoadingGif());
             speechService.speak('주문이 모두 끝났습니다. 주문하신 메뉴를 준비 중이니 잠시만 기다려주세요. 메뉴가 완성되면 수령대에서 안내드릴게요.');
-          }, 5000)
+          }, 6000)
         );
-      }, 3600)
+      }, 4000)
     );
 
     paymentAnimationTimers.current.push(
@@ -265,6 +266,7 @@ const CheckoutView = () => {
         isPaymentCompleted.current = true; 
         
         clearOrder(); // orderItems가 0이 되어도 위 useEffect에서 무시됨
+        clearChatHistory(); // 결제 완료 후 대화 내역 초기화
         setPaymentMethod(null);
         
         navigate('/kiosk'); 

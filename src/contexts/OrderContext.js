@@ -23,6 +23,7 @@ const ActionTypes = {
   REMOVE_ITEM: 'REMOVE_ITEM',
   UPDATE_ITEM: 'UPDATE_ITEM',
   CLEAR_ORDER: 'CLEAR_ORDER',
+  CLEAR_CHAT_HISTORY: 'CLEAR_CHAT_HISTORY',
   APPLY_DISCOUNT: 'APPLY_DISCOUNT',
   SET_COUPON: 'SET_COUPON',
   SET_GIFT_CARD: 'SET_GIFT_CARD',
@@ -85,7 +86,19 @@ function orderReducer(state, action) {
       };
     
     case ActionTypes.CLEAR_ORDER:
-      return initialState;
+      // 주문 데이터만 초기화하고 대화 내역은 유지
+      return {
+        ...initialState,
+        chatHistory: state.chatHistory,
+        isListening: state.isListening,
+        currentTranscript: state.currentTranscript
+      };
+    
+    case ActionTypes.CLEAR_CHAT_HISTORY:
+      return {
+        ...state,
+        chatHistory: []
+      };
     
     case ActionTypes.APPLY_DISCOUNT:
       return {
@@ -197,6 +210,10 @@ export function OrderProvider({ children }) {
     dispatch({ type: ActionTypes.CLEAR_ORDER });
   }, []);
 
+  const clearChatHistory = useCallback(() => {
+    dispatch({ type: ActionTypes.CLEAR_CHAT_HISTORY });
+  }, []);
+
   const applyDiscount = useCallback((amount) => {
     dispatch({ type: ActionTypes.APPLY_DISCOUNT, payload: amount });
   }, []);
@@ -239,6 +256,7 @@ export function OrderProvider({ children }) {
     removeItem,
     updateItem,
     clearOrder,
+    clearChatHistory,
     applyDiscount,
     setCoupon,
     setGiftCard,
