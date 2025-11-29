@@ -250,15 +250,9 @@ const PaymentView = () => {
       } else if (text.includes('모바일') || text.includes('삼성') || text.includes('애플') || text.includes('폰')) { 
         // 어르신들은 '모바일' 대신 '삼성페이', '핸드폰' 등으로 말할 수 있음
         handlePaymentMethodSelect('mobile');
-      } 
-      // 바코드 캡쳐 명령 처리 (결제 수단 선택보다 우선)
-      else if ((text.includes('바코드 캡쳐') || text.includes('바코드 캡처') || text.includes('바코드 찍') || text.includes('캡쳐') || text.includes('캡처')) 
-               && paymentMethod === 'giftcard' && isCameraActive && !isCapturing) {
-        handleCapture();
-      }
-      else if (text.includes('기프티콘') || text.includes('쿠폰') || text.includes('바코드')) { 
+      } else if (text.includes('기프티콘') || text.includes('쿠폰') || text.includes('바코드')) { 
         handlePaymentMethodSelect('giftcard');
-      }
+      } 
       // "결제해줘", "다 했어" 등의 명령 -> 상황에 따라 다음 단계로
       else if ((text.includes('결제') || text.includes('완료') || text.includes('좋아')) && paymentMethod && serviceType) {
         handlePaymentMethodAdded();
@@ -270,7 +264,7 @@ const PaymentView = () => {
 
       setIsProcessing(false);
     },
-    [paymentMethod, serviceType, isCameraActive, isCapturing, handleServiceTypeSelect, handlePaymentMethodSelect, handlePaymentMethodAdded, handleCapture]
+    [paymentMethod, serviceType, handleServiceTypeSelect, handlePaymentMethodSelect, handlePaymentMethodAdded]
   );
 
   // 초기 진입 시 안내 멘트

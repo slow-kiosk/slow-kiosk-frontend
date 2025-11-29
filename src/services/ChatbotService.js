@@ -98,20 +98,23 @@ class ChatbotService {
 
     return new Promise((resolve, reject) => {
       try {
-        // 1. 대화 히스토리 추가
+       // 1. 대화 히스토리 추가
         this.conversationHistory.push({
           role: 'user',
           content: userMessage
         });
 
-        // 2. 응답을 받을 resolve 함수를 큐에 저장
         this.pendingResolvers.push(resolve);
-
-        // 3. KioskRequest DTO 구조로 메시지 전송
-        // KioskSocketController.java: @MessageMapping("/kiosk/message") -> /pub/kiosk/message
+        
+        // 2. 최근 대화 내역 10개만 자르기 (데이터 절약)
+        const recentHistory = this.conversationHistory.slice(-10);
+        
+        // 3. 서버로 전송할 데이터 구성
         const requestDto = {
           userText: userMessage,
-          currentState: context.stage || 'ordering' // 백엔드 KioskRequest.currentState 매핑
+          currentState: context.stage || 'ORDERING',
+          // 대화 내역(history) 추가
+          history: recentHistory 
         };
 
         this.client.publish({
