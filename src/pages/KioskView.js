@@ -1,5 +1,5 @@
 // 메인 화면 - 주문 시작
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useOrder } from '../contexts/OrderContext';
 import speechService from '../services/SpeechService';
@@ -15,6 +15,17 @@ const KioskView = () => {
   const { clearOrder, setStage } = useOrder();
   const [selectedMode, setSelectedMode] = useState(null);
   const [showModeSelection, setShowModeSelection] = useState(true);
+  const [displayText, setDisplayText] = useState('');
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const messages = useMemo(() => [
+    '안녕하세요! 느린 키오스크입니다',
+    '음성으로 편리하게 주문하세요',
+    '준비가 완료되면 주문 시작하기를 말해주세요',
+    'AI가 친절하게 도와드립니다',
+    '천천히, 편안하게 주문해보세요',
+  ], []);
 
   useEffect(() => {
     // 초기 화면 진입 시 주문 초기화 (경로가 / 또는 /kiosk일 때)
@@ -23,6 +34,82 @@ const KioskView = () => {
       setStage('kiosk');
     }
   }, [location.pathname, clearOrder, setStage]);
+
+  useEffect(() => {
+    if (showModeSelection) return; // 모드 선택 화면일 때는 타이핑 효과 중지
+
+    const currentMessage = messages[currentMessageIndex];
+    let timeout;
+
+    if (!isDeleting && displayText.length < currentMessage.length) {
+      // 타이핑 중
+      timeout = setTimeout(() => {
+        setDisplayText(currentMessage.substring(0, displayText.length + 1));
+      }, 100);
+    } else if (!isDeleting && displayText.length === currentMessage.length) {
+      // 타이핑 완료, 잠시 대기 후 삭제 시작
+      timeout = setTimeout(() => {
+        setIsDeleting(true);
+      }, 2500);
+    } else if (isDeleting && displayText.length > 0) {
+      // 삭제 중
+      timeout = setTimeout(() => {
+        setDisplayText(currentMessage.substring(0, displayText.length - 1));
+      }, 50);
+    } else if (isDeleting && displayText.length === 0) {
+      // 삭제 완료, 다음 메시지로
+      setIsDeleting(false);
+      setCurrentMessageIndex((prev) => (prev + 1) % messages.length);
+    }
+
+    return () => clearTimeout(timeout);
+  }, [displayText, currentMessageIndex, isDeleting, showModeSelection, messages]);
+
+  // 음성 인식으로 "주문 시작하기" 감지
+  useEffect(() => {
+    if (showModeSelection || !speechService.isSupported()) return;
+
+    const handleVoiceCommand = (text) => {
+      const normalizedText = text.trim().toLowerCase();
+      // "주문 시작하기" 또는 유사한 표현 감지
+      if (
+        normalizedText.includes('주문 시작하기') ||
+        normalizedText.includes('주문 시작') ||
+        normalizedText.includes('시작하기') ||
+        normalizedText.includes('시작')
+      ) {
+        setStage('payment');
+        navigate('/payment');
+      }
+    };
+
+    // 음성 인식 결과 처리
+    speechService.onResult((result) => {
+      if (result.final) {
+        handleVoiceCommand(result.final);
+      }
+    });
+
+    // 음성 인식 에러 처리
+    speechService.onError((error) => {
+      if (error !== 'no-speech') {
+        console.error('음성 인식 오류:', error);
+      }
+    });
+
+    // 음성 인식 시작
+    if (!speechService.isListening) {
+      try {
+        speechService.start(true);
+      } catch (e) {
+        console.log('이미 마이크가 켜져 있습니다.');
+      }
+    }
+
+    return () => {
+      speechService.stop();
+    };
+  }, [showModeSelection, navigate, setStage]);
 
   const handleModeSelection = (mode) => {
     setSelectedMode(mode);
@@ -37,16 +124,6 @@ const KioskView = () => {
 
     setStage('ordering');
     navigate('/ordering');
-  };
-
-  const handleResetModeSelection = () => {
-    setSelectedMode(null);
-    setShowModeSelection(true);
-  };
-
-  const handlePayment = () => {
-    setStage('payment');
-    navigate('/payment');
   };
 
   const handleOpenGlobalSettings = () => {
@@ -94,39 +171,14 @@ const KioskView = () => {
           </div>
         </div>
       )}
-      <div className="kiosk-main-content">
-        <div className="welcome-section">
-          <h1 className="main-title">느린 키오스크</h1>
-          <p className="subtitle">음성으로 편리하게 주문하세요</p>
+      {!showModeSelection && (
+        <div className="typing-text-container">
+          <span className="typing-text">
+            {displayText}
+            <span className="typing-cursor">|</span>
+          </span>
         </div>
-
-        <div className="features-section">
-          <div className="feature-card">
-            <div className="feature-icon">🎤</div>
-            <h3>음성 주문</h3>
-            <p>메뉴를 말씀해주시면<br />자동으로 주문됩니다</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">💬</div>
-            <h3>AI 가이드</h3>
-            <p>단계별로 친절하게<br />안내해드립니다</p>
-          </div>
-        </div>
-
-        <button 
-          className="start-button"
-          onClick={handlePayment}
-        >
-          주문 시작하기
-        </button>
-
-        {!speechService.isSupported() && (
-          <div className="warning-message">
-            이 브라우저는 음성 인식을 지원하지 않습니다.<br />
-            Chrome 또는 Edge 브라우저를 사용해주세요.
-          </div>
-        )}
-      </div>
+      )}
       <button
         type="button"
         className="global-settings-button"
