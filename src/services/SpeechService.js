@@ -322,19 +322,10 @@ class SpeechService {
     // 재시도 횟수 초기화
     this.retryCount = 0;
 
-    // 기존 음성이 재생 중이면 대기 후 재생 (중단하지 않음)
+    // 기존 음성이 재생 중이면 중단하고 새로운 음성 재생
     if (this.synthesis.speaking || this.synthesis.pending) {
-        // 현재 재생 중인 음성이 끝날 때까지 대기
-        const checkAndSpeak = () => {
-          if (this.synthesis.speaking || this.synthesis.pending) {
-            setTimeout(checkAndSpeak, 100);
-          } else {
-            // 이전 음성이 끝났으므로 새 음성 재생
-            this._doSpeak(text, options);
-          }
-        };
-        checkAndSpeak();
-        return;
+        console.log('[음성 출력] 기존 음성 중단 후 새 음성 재생');
+        this.stopSpeaking();
     }
     
     this._doSpeak(text, options);
@@ -452,6 +443,24 @@ class SpeechService {
     if (!recognizedText || !recognizedText.trim()) return false;
     
     const normalizedRecognized = this.normalizeText(recognizedText);
+    
+    // 중요한 키워드가 포함된 경우 필터링하지 않음 (사용자 의도 명확)
+    const importantKeywords = [
+      '매장', '포장', '먹고', '자리',
+      '카드', '신용',
+      '모바일', '삼성', '애플', '폰',
+      '바코드', '캡쳐', '캡처',
+      '기프티콘', '쿠폰', '할인',
+      '결제', '완료', '좋아',
+      '주문 내역', '주문내역', '주문 완료', '주문완료'
+    ];
+    
+    // 중요한 키워드가 포함되어 있으면 필터링하지 않음
+    for (const keyword of importantKeywords) {
+      if (normalizedRecognized.includes(keyword)) {
+        return false;
+      }
+    }
     
     // 최근 TTS 출력들과 비교
     for (const ttsOutput of this.recentTTSOutputs) {

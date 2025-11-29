@@ -231,7 +231,7 @@ const CheckoutView = () => {
         setTicketNumber(randomTicketNumber.toString());
         setShowTicketNumber(true);
         
-        // 4초 후 번호표 숨기기
+        // 5초 후 번호표 숨기기
         paymentAnimationTimers.current.push(
           setTimeout(() => {
             setShowTicketNumber(false);
@@ -243,8 +243,8 @@ const CheckoutView = () => {
             setPreparationSubText('조금만 기다려주시면 따뜻한 메뉴로 안내드릴게요.');
             setPreparationGuideText('번호 호출 시 수령대 앞으로 이동해 주문하신 메뉴를 수령해주세요.');
             setPreparationGifSrc(getRandomLoadingGif());
-            speechService.speak('번호 안내가 모두 끝났습니다. 주문하신 메뉴를 준비 중이니 잠시만 기다려주세요. 메뉴가 완성되면 수령대에서 안내드릴게요.');
-          }, 4000)
+            speechService.speak('주문이 모두 끝났습니다. 주문하신 메뉴를 준비 중이니 잠시만 기다려주세요. 메뉴가 완성되면 수령대에서 안내드릴게요.');
+          }, 5000)
         );
       }, 3600)
     );
