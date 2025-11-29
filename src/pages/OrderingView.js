@@ -18,6 +18,7 @@ const OrderingView = () => {
   const {
     orderItems,
     addItem,
+    clearOrder,
     addChatMessage,
     setListening,
     setTranscript,
@@ -32,6 +33,42 @@ const OrderingView = () => {
   const [imageErrorStates, setImageErrorStates] = useState({});
   const chatEndRef = useRef(null);
   const hasInitialized = useRef(false);
+  const [pendingCart, setPendingCart] = useState(null); // 대기 중인 장바구니 데이터
+
+  // 1. 장바구니 동기화 함수 수정
+  const syncCart = useCallback((serverCartMap) => {
+    // 메뉴가 아직 로드되지 않았다면 대기열에 저장하고 종료
+    if (menus.length === 0) {
+        console.log("메뉴 로딩 전이라 장바구니 동기화를 보류합니다.");
+        setPendingCart(serverCartMap);
+        return;
+    }
+
+    // 메뉴가 있으면 즉시 반영
+    if (clearOrder) clearOrder();
+    
+    Object.entries(serverCartMap).forEach(([menuIdStr, qty]) => {
+      const menuId = parseInt(menuIdStr, 10);
+      // 여기서 menu를 못 찾으면(undefined) 화면에 안 뜹니다.
+      const menu = menus.find(m => m.id === menuId);
+      
+      if (menu) {
+        addItem({ ...menu, quantity: qty });
+      } else {
+        console.warn(`ID가 ${menuId}인 메뉴를 프론트엔드 메뉴 리스트에서 찾을 수 없습니다.`);
+      }
+    });
+  }, [menus, addItem, clearOrder]);
+
+  // 2. [추가] 메뉴 로딩 완료 후, 대기 중이던 장바구니 데이터가 있으면 반영
+  useEffect(() => {
+    if (menus.length > 0 && pendingCart) {
+        console.log("메뉴 로딩 완료! 보류했던 장바구니를 동기화합니다.");
+        syncCart(pendingCart);
+        setPendingCart(null);
+    }
+  }, [menus, pendingCart, syncCart]);
+
 
   const handleOrderList = useCallback(() => { // 주문 내역 확인
     setStage('order-list');

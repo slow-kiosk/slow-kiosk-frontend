@@ -19,6 +19,9 @@ class SpeechService {
     this.voices = [];
     this.isReady = false;
     this.retryCount = 0; // 재시도 횟수 제한용
+    this.recentTTSOutputs = []; // 최근 TTS 출력 텍스트 목록 (자기 음성 필터링용)
+    this.lastTTSEndTime = 0; // 마지막 TTS 종료 시간
+    this.TTS_FILTER_DURATION = 2000; // TTS 종료 후 필터링 지속 시간 (ms)
 
     // 목소리 로드 리스너
     if (this.synthesis && this.synthesis.onvoiceschanged !== undefined) {
@@ -80,14 +83,30 @@ class SpeechService {
         // 현재 전사본 업데이트
         this.currentTranscript = interimTranscript || finalTranscript;
         
-        // 최종 텍스트가 있고 백엔드 전송이 활성화된 경우 백엔드로 전송
-        if (finalTranscript && this.sendToBackend && this.apiService) {
-          this.apiService.sendSTTText(finalTranscript, {
-            source: 'web-speech-api',
-            lang: 'ko-KR'
-          }).catch(error => {
-            console.error('백엔드 전송 실패:', error);
-          });
+        // 최종 텍스트가 있는 경우, TTS 출력과 유사한지 확인
+        if (finalTranscript) {
+          // TTS 출력 필터링: 최근 TTS 출력과 유사한 텍스트는 무시
+          if (this.isSimilarToRecentTTS(finalTranscript)) {
+            console.log('[음성 인식 필터링] TTS 출력과 유사한 텍스트를 무시합니다:', finalTranscript);
+            return; // TTS 출력으로 인식된 텍스트는 무시
+          }
+          
+          // TTS 종료 후 일정 시간 내의 인식 결과도 필터링
+          const timeSinceLastTTS = Date.now() - this.lastTTSEndTime;
+          if (timeSinceLastTTS < this.TTS_FILTER_DURATION) {
+            console.log('[음성 인식 필터링] TTS 종료 직후 인식 결과를 무시합니다:', finalTranscript);
+            return;
+          }
+          
+          // 최종 텍스트가 있고 백엔드 전송이 활성화된 경우 백엔드로 전송
+          if (this.sendToBackend && this.apiService) {
+            this.apiService.sendSTTText(finalTranscript, {
+              source: 'web-speech-api',
+              lang: 'ko-KR'
+            }).catch(error => {
+              console.error('백엔드 전송 실패:', error);
+            });
+          }
         }
         
         if (this.onResultCallback) {
@@ -325,6 +344,9 @@ class SpeechService {
 
     // TTS 출력 동안 음성 인식을 일시 중지하여 자기 목소리를 인식하지 않도록 함
     this.pauseRecognitionForTTS();
+    
+    // TTS 출력 텍스트를 최근 목록에 추가 (자기 음성 필터링용)
+    this.addRecentTTSOutput(text);
 
     const utterance = new SpeechSynthesisUtterance(text);
     
@@ -344,6 +366,8 @@ class SpeechService {
 
     // [중요] 말하기가 끝나면 onEnd 실행 -> 여기서 보통 this.start()가 호출됨
     utterance.onend = () => {
+      // TTS 종료 시간 기록
+      this.lastTTSEndTime = Date.now();
       this.resumeRecognitionAfterTTS();
       if (options.onEnd) {
         options.onEnd();
@@ -363,6 +387,7 @@ class SpeechService {
         this.synthesis.cancel();
         // 에러 발생 시에도 흐름이 끊기지 않게 onEnd 호출
         if (options.onEnd) options.onEnd();
+        this.lastTTSEndTime = Date.now();
         this.resumeRecognitionAfterTTS();
       }
       
@@ -384,6 +409,94 @@ class SpeechService {
     if (this.synthesis) {
       this.synthesis.cancel();
     }
+  }
+
+  /**
+   * 최근 TTS 출력 텍스트 목록에 추가
+   * @param {string} text - TTS 출력 텍스트
+   */
+  addRecentTTSOutput(text) {
+    if (!text || !text.trim()) return;
+    
+    const normalizedText = this.normalizeText(text);
+    this.recentTTSOutputs.push({
+      text: normalizedText,
+      originalText: text,
+      timestamp: Date.now()
+    });
+    
+    // 최근 10개만 유지 (메모리 관리)
+    if (this.recentTTSOutputs.length > 10) {
+      this.recentTTSOutputs.shift();
+    }
+  }
+
+  /**
+   * 텍스트 정규화 (비교를 위해)
+   * @param {string} text - 원본 텍스트
+   * @returns {string} 정규화된 텍스트
+   */
+  normalizeText(text) {
+    return text.trim()
+      .replace(/\s+/g, ' ') // 연속된 공백을 하나로
+      .replace(/[.,!?]/g, '') // 구두점 제거
+      .toLowerCase();
+  }
+
+  /**
+   * 인식된 텍스트가 최근 TTS 출력과 유사한지 확인
+   * @param {string} recognizedText - 음성 인식으로 받은 텍스트
+   * @returns {boolean} 유사하면 true
+   */
+  isSimilarToRecentTTS(recognizedText) {
+    if (!recognizedText || !recognizedText.trim()) return false;
+    
+    const normalizedRecognized = this.normalizeText(recognizedText);
+    
+    // 최근 TTS 출력들과 비교
+    for (const ttsOutput of this.recentTTSOutputs) {
+      const similarity = this.calculateSimilarity(normalizedRecognized, ttsOutput.text);
+      
+      // 유사도가 70% 이상이면 TTS 출력으로 간주
+      if (similarity >= 0.7) {
+        return true;
+      }
+      
+      // 부분 일치 확인 (인식된 텍스트가 TTS 출력의 일부를 포함하는 경우)
+      if (ttsOutput.text.includes(normalizedRecognized) || 
+          normalizedRecognized.includes(ttsOutput.text)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
+  /**
+   * 두 텍스트 간의 유사도 계산 (간단한 레벤슈타인 거리 기반)
+   * @param {string} text1 - 첫 번째 텍스트
+   * @param {string} text2 - 두 번째 텍스트
+   * @returns {number} 유사도 (0.0 ~ 1.0)
+   */
+  calculateSimilarity(text1, text2) {
+    if (!text1 || !text2) return 0;
+    if (text1 === text2) return 1;
+    
+    const longer = text1.length > text2.length ? text1 : text2;
+    const shorter = text1.length > text2.length ? text2 : text1;
+    
+    if (longer.length === 0) return 1;
+    
+    // 간단한 유사도 계산: 공통 문자 비율
+    let commonChars = 0;
+    const shorterSet = new Set(shorter);
+    for (const char of longer) {
+      if (shorterSet.has(char)) {
+        commonChars++;
+      }
+    }
+    
+    return commonChars / longer.length;
   }
 
   isSupported() {
