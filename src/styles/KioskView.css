@@ -36,13 +36,13 @@
 }
 
 .mode-selection-label {
-  font-size: calc(22px * var(--font-size-multiplier));
+  font-size: calc(32px * var(--font-size-multiplier));
   color: var(--text-secondary);
   margin-bottom: 12px;
 }
 
 .mode-selection-panel h2 {
-  font-size: calc(44px * var(--font-size-multiplier));
+  font-size: calc(56px * var(--font-size-multiplier));
   margin: 0 0 32px;
   color: var(--text-primary);
 }
@@ -94,13 +94,13 @@
 }
 
 .mode-title {
-  font-size: calc(32px * var(--font-size-multiplier));
+  font-size: calc(40px * var(--font-size-multiplier));
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .mode-description {
-  font-size: calc(22px * var(--font-size-multiplier));
+  font-size: calc(28px * var(--font-size-multiplier));
   color: var(--text-secondary);
   line-height: 1.5;
 }
@@ -367,36 +367,83 @@
   letter-spacing: -0.01em;
 }
 
+/* 고대비 모드 스타일 */
+:root.high-contrast .kiosk-view {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .mode-selection-backdrop {
+  background: rgba(0, 0, 0, 0.8) !important;
+}
+
+:root.high-contrast .mode-selection-panel {
+  background: #000000 !important;
+  border: 3px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .mode-selection-panel * {
+  color: #ffffff !important;
+}
+
+:root.high-contrast .mode-card {
+  background: #000000 !important;
+  border: 3px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .mode-card * {
+  color: #ffffff !important;
+}
+
+:root.high-contrast .mode-card.selected {
+  background: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+:root.high-contrast .mode-card.selected * {
+  color: #000000 !important;
+}
+
+:root.high-contrast .typing-text {
+  color: #ffffff !important;
+}
+
+:root.high-contrast .typing-cursor {
+  background-color: #ffffff !important;
+}
+
 :root.high-contrast .global-settings-button {
-  background: var(--bg-color);
-  color: var(--text-primary);
-  border-color: var(--border-color);
-  box-shadow: none;
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+  box-shadow: none !important;
 }
 
 :root.high-contrast .global-settings-button .global-settings-title {
-  color: var(--text-primary);
+  color: #ffffff !important;
 }
 
 :root.high-contrast .global-settings-icon {
-  background: var(--border-color);
-  color: #000;
+  background: #ffffff !important;
+  color: #000000 !important;
 }
 
 :root.high-contrast .global-settings-caption {
-  color: var(--text-primary);
+  color: #ffffff !important;
 }
 
 :root.high-contrast .feature-card {
-  background: #ffffff;
-  border-color: #000000;
-  color: #000000;
+  background: #000000 !important;
+  border-color: #ffffff !important;
+  color: #ffffff !important;
 }
 
 :root.high-contrast .feature-card h3,
 :root.high-contrast .feature-card p,
 :root.high-contrast .feature-icon {
-  color: #000000;
+  color: #ffffff !important;
 }
 
 /* 타이핑 텍스트 컨테이너 */
@@ -415,7 +462,7 @@
 }
 
 .typing-text {
-  font-size: 121px;
+  font-size: calc(140px * var(--font-size-multiplier));
   font-weight: 700;
   color: #3182F6;
   text-align: center;

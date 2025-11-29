@@ -9,6 +9,73 @@
   justify-content: center;
 }
 
+/* 고대비 모드 스타일 */
+:root.high-contrast .discount-view {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .discount-view * {
+  color: #ffffff !important;
+}
+
+:root.high-contrast .discount-left {
+  background: #000000 !important;
+  border: 3px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .order-items-list {
+  background: #000000 !important;
+  border: 2px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .order-item-row {
+  background: #000000 !important;
+  border: 2px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .price-breakdown {
+  background: #000000 !important;
+  border: 3px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .proceed-button {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #ffffff !important;
+}
+
+:root.high-contrast .payment-progress-card {
+  background: #000000 !important;
+  border: 3px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .preparation-overlay-card {
+  background: #000000 !important;
+  border: 3px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+/* 고대비 모드: pickup-guide 텍스트를 검정색으로 */
+:root.high-contrast .pickup-guide {
+  background: #ffffff !important;
+  border: 2px solid #000000 !important;
+}
+
+:root.high-contrast .pickup-guide * {
+  color: #000000 !important;
+}
+
+:root.high-contrast .pickup-guide-title,
+:root.high-contrast .pickup-guide-body {
+  color: #000000 !important;
+}
+
 .discount-container {
   width: min(1200px, 100%);
   height: min(90vh, 900px);
@@ -37,7 +104,7 @@
 }
 
 .section-title {
-  font-size: calc(48px * var(--font-size-multiplier, 1));
+  font-size: calc(56px * var(--font-size-multiplier, 1));
   margin: 0;
   color: #181c42;
   font-weight: 700;
@@ -84,19 +151,19 @@
 }
 
 .item-name {
-  font-size: calc(32px * var(--font-size-multiplier, 1));
+  font-size: calc(40px * var(--font-size-multiplier, 1));
   font-weight: 700;
   color: #1f234b;
 }
 
 .item-quantity {
-  font-size: calc(22px * var(--font-size-multiplier, 1));
+  font-size: calc(28px * var(--font-size-multiplier, 1));
   color: #8c90b3;
   margin: 0 16px;
 }
 
 .item-price {
-  font-size: calc(32px * var(--font-size-multiplier, 1));
+  font-size: calc(40px * var(--font-size-multiplier, 1));
   font-weight: 700;
   color: #5b63ff;
 }

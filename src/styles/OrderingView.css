@@ -6,6 +6,56 @@
   box-sizing: border-box;
 }
 
+/* 고대비 모드 스타일 */
+:root.high-contrast .ordering-view {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .ordering-view * {
+  color: #ffffff !important;
+}
+
+:root.high-contrast .ordering-left,
+:root.high-contrast .ordering-right {
+  background: #000000 !important;
+  border: 2px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .menu-card {
+  background: #000000 !important;
+  border: 2px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .menu-card * {
+  color: #ffffff !important;
+}
+
+:root.high-contrast .chat-container {
+  background: #000000 !important;
+  border: 2px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .voice-status {
+  background: #000000 !important;
+  border: 2px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .button-group button {
+  background: #000000 !important;
+  border: 2px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .button-group button:hover {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
 .ordering-container {
   display: flex;              
   flex-direction: column;    
@@ -39,7 +89,7 @@
 }
 
 .section-title {
-  font-size: calc(32px * var(--font-size-multiplier, 1));
+  font-size: calc(44px * var(--font-size-multiplier, 1));
   font-weight: 700;
   color: var(--text-primary, #333);
   margin-bottom: 24px;

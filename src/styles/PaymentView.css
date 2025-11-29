@@ -11,6 +11,65 @@
   box-sizing: border-box;
 }
 
+/* 고대비 모드 스타일 */
+:root.high-contrast .payment-view {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .payment-view * {
+  color: #ffffff !important;
+}
+
+:root.high-contrast .payment-container {
+  background: #000000 !important;
+  border: 3px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .service-type-section {
+  background: #000000 !important;
+  border: 2px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .service-button {
+  background: #000000 !important;
+  border: 2px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .service-button.selected {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+:root.high-contrast .method-button {
+  background: #000000 !important;
+  border: 2px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .method-button.selected {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+:root.high-contrast .method-button.selected * {
+  color: #000000 !important;
+}
+
+:root.high-contrast .method-button.selected .method-icon,
+:root.high-contrast .method-button.selected .method-name {
+  color: #000000 !important;
+}
+
+:root.high-contrast .complete-payment-button {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #ffffff !important;
+}
+
 .payment-container {
   width: 90%;
   max-width: 900px;
@@ -37,7 +96,7 @@
 }
 
 .section-subtitle {
-  font-size: calc(1.8rem * var(--font-size-multiplier));
+  font-size: calc(2.4rem * var(--font-size-multiplier));
   font-weight: 600;
   color: #333;
   margin: 0;

@@ -160,4 +160,19 @@
   }
 }
 
+/* 고대비 모드: 챗봇 응답 카드의 텍스트를 검은색으로 */
+:root.high-contrast .chat-bubble.assistant .chat-message {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+}
+
+:root.high-contrast .chat-bubble.assistant .chat-message p {
+  color: #000000 !important;
+}
+
+:root.high-contrast .chat-bubble.assistant .typing-dot {
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
 

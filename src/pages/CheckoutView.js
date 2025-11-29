@@ -270,7 +270,7 @@ const CheckoutView = () => {
         setPaymentMethod(null);
         
         navigate('/kiosk'); 
-      }, 13500)
+      }, 15000)
     );
   };
 
