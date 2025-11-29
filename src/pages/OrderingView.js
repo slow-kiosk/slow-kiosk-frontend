@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useOrder } from '../contexts/OrderContext';
 import speechService from '../services/SpeechService';
 import chatbotService from '../services/ChatbotService';
-import { findMenuByName, fetchMenus } from '../data/menus';
+import { fetchMenus } from '../data/menus';
 import ChatBubble from '../components/ChatBubble';
 import '../styles/OrderingView.css';
 import '../components/Text.css';
@@ -128,14 +128,10 @@ const OrderingView = () => {
     
     setIsProcessing(true);
     
-    // 사용자 메시지 추가
-    const userMessage = {
-      role: 'user',
-      content: text
-    };
-    addChatMessage(userMessage);
+    // 1. 사용자 말풍선 표시
+    addChatMessage({ role: 'user', content: text });
 
-    // "주문 내역" 음성 인식 처리
+    // 2. 특수 명령어 처리 (주문 내역, 주문 완료)
     const normalizedText = text.trim().toLowerCase();
     if (normalizedText.includes('주문 내역') || normalizedText.includes('주문내역')) {
       setIsProcessing(false);
@@ -143,51 +139,25 @@ const OrderingView = () => {
       return;
     }
 
-    // "주문 완료" 음성 인식 처리
-    const normalizedText2 = text.trim().toLowerCase();
-    if (normalizedText2.includes('주문 완료') || normalizedText2.includes('주문완료')) {
+    if (normalizedText.includes('주문 완료') || normalizedText.includes('주문완료')) {
       setIsProcessing(false);
       handleCompleteOrder();
       return;
     }
 
-    // 챗봇에 전달
+    // 3. [수정] 복잡한 로직 다 제거하고, 오직 서버로 전송만 함!
+    // 메뉴 찾기, 로컬 장바구니 추가 등은 모두 서버 응답(handleServerResponse)에서 처리됨.
+    // 프론트엔드가 로컬에서 메뉴를 찾아서 처리하는 로직을 완전히 제거하고,
+    // 무조건 서버(AI)가 보내준 메시지와 데이터를 따르도록 함.
     try {
-      const response = await chatbotService.sendMessage(text, {
-        currentOrder: orderItems,
-        availableMenus: menus,
-        stage: 'ordering'
-      });
-
-      // 메뉴 이름 추출 시도
-      const menu = findMenuByName(menus, text);
-      if (menu) {
-        addItem({
-          ...menu,
-          quantity: 1
-        });
-        
-        const confirmMessage = {
-          role: 'assistant',
-          content: `${menu.name}를 주문 목록에 추가했습니다. 추가로 주문하시겠습니까?`,
-          suggestions: ['더 주문하기', '주문 완료', '주문 내역'],
-          isTypingText: true, // iMessage 스타일 타이핑 애니메이션
-          imageUrl: menu.imageUrl,
-          imageAlt: `${menu.name} 이미지`
-        };
-        addChatMessage(confirmMessage);
-        // 타이핑 애니메이션이 완료된 후 음성 출력
-        setTimeout(() => {
-          speechService.speak(confirmMessage.content);
-        }, confirmMessage.content.length * 30 + 200);
-      } else {
-        // 챗봇 응답 처리 - handleServerResponse 사용
-        handleServerResponse(response);
-      }
+      await chatbotService.sendMessage(text, { stage: 'ordering' });
+      // 서버 응답이 오면 handleServerResponse 콜백이 자동으로 호출됨
+      // 여기서 아무것도 안 함 (서버 응답이 오면 handleServerResponse가 알아서 함)
     } catch (error) {
+      console.error("메시지 전송 실패", error);
       setIsProcessing(false);
     }
-  }, [isProcessing, orderItems, menus, addItem, addChatMessage, navigate, handleOrderList, handleCompleteOrder, handleServerResponse]);
+  }, [isProcessing, addChatMessage, handleOrderList, handleCompleteOrder]);
 
   // 메뉴 데이터 가져오기
   useEffect(() => {
@@ -212,6 +182,9 @@ const OrderingView = () => {
 
   useEffect(() => {
     setStage('ordering');
+    
+    // [추가] ChatbotService에 서버 응답 콜백 등록
+    chatbotService.setOnMessageCallback(handleServerResponse);
     
     // 개발자 콘솔 테스트용 핸들러 등록
     speechService.setTestVoiceInputHandler(handleVoiceInput);
@@ -268,8 +241,10 @@ const OrderingView = () => {
       setListening(false);
       // 컴포넌트 언마운트 시 테스트 핸들러 제거
       speechService.clearTestVoiceInputHandler();
+      // [추가] ChatbotService 콜백 제거
+      chatbotService.clearOnMessageCallback();
     };
-  }, [addChatMessage, setListening, setTranscript, setStage, handleVoiceInput]);
+  }, [addChatMessage, setListening, setTranscript, setStage, handleVoiceInput, handleServerResponse]);
 
   const handleSuggestionClick = (suggestion) => {
     handleVoiceInput(suggestion);

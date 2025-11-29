@@ -14,6 +14,9 @@ class ChatbotService {
     
     this.conversationHistory = [];
     
+    // 서버 응답을 화면으로 전달하는 콜백 함수
+    this.onMessageCallback = null;
+    
     this.connect();
   }
 
@@ -60,8 +63,9 @@ class ChatbotService {
     // 기존 코드와의 호환성을 위해 구조를 맞춥니다.
     const mappedResponse = {
       message: responseDto.spokenResponse || '응답이 없습니다.',
+      spokenResponse: responseDto.spokenResponse, // 원본 응답도 포함
       suggestions: [], // 필요 시 서버 uiData에서 추출 가능
-      action: this.mapStateToAction(responseDto.newState),
+      action: null, // 액션 처리는 이제 콜백에서 전담하므로 null 처리
       newState: responseDto.newState, // 직접 접근 가능하도록 추가
       updatedCart: responseDto.updatedCart, // 직접 접근 가능하도록 추가
       slowMode: responseDto.slowMode || false, // slowMode 추가
@@ -71,7 +75,14 @@ class ChatbotService {
       }
     };
 
-    // 3. 대기 중인 요청(sendMessage의 await)을 해결(resolve)
+    // 3. [중요] 콜백 함수 호출 - OrderingView의 handleServerResponse가 실행되도록 함
+    // 이게 없으면 AI의 응답이 화면에 표시되지 않음
+    // 콜백을 먼저 호출하여 서버 응답을 즉시 화면에 반영
+    if (this.onMessageCallback) {
+      this.onMessageCallback(mappedResponse);
+    }
+
+    // 4. 대기 중인 요청(sendMessage의 await)을 해결(resolve)
     // 순차적 처리를 가정 (FIFO)
     if (this.pendingResolvers.length > 0) {
       const resolve = this.pendingResolvers.shift();
@@ -162,6 +173,16 @@ class ChatbotService {
 
   getHistory() {
     return this.conversationHistory;
+  }
+
+  // 콜백 함수 등록 메서드
+  setOnMessageCallback(callback) {
+    this.onMessageCallback = callback;
+  }
+
+  // 콜백 함수 제거 메서드
+  clearOnMessageCallback() {
+    this.onMessageCallback = null;
   }
 }
 
