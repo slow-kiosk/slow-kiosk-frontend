@@ -1,6 +1,6 @@
 // 메인 화면 - 주문 시작
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useOrder } from '../contexts/OrderContext';
 import speechService from '../services/SpeechService';
 import '../styles/KioskView.css';
@@ -11,15 +11,18 @@ import '../components/Button.css';
 // 기본 / 느린 키오스크 모드 추가
 const KioskView = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { clearOrder, setStage } = useOrder();
   const [selectedMode, setSelectedMode] = useState(null);
   const [showModeSelection, setShowModeSelection] = useState(true);
 
   useEffect(() => {
-    // 페이지 진입 시 주문 초기화
-    clearOrder();
-    setStage('kiosk');
-  }, [clearOrder, setStage]);
+    // 초기 화면 진입 시 주문 초기화 (경로가 / 또는 /kiosk일 때)
+    if (location.pathname === '/' || location.pathname === '/kiosk') {
+      clearOrder();
+      setStage('kiosk');
+    }
+  }, [location.pathname, clearOrder, setStage]);
 
   const handleModeSelection = (mode) => {
     setSelectedMode(mode);
@@ -92,24 +95,6 @@ const KioskView = () => {
         </div>
       )}
       <div className="kiosk-main-content">
-        {/* {!showModeSelection && (
-          <div className="mode-reset-banner" role="status" aria-live="polite">
-            <div className="mode-reset-copy">
-              <span className="mode-reset-icon" aria-hidden="true">🔄</span>
-              <div className="mode-reset-text">
-                <p className="mode-reset-title">느린 키오스크 모드가 켜져 있어요</p>
-                <p className="mode-reset-description">필요하면 다른 모드로 금방 바꿀 수 있어요.</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              className="mode-reset-button"
-              onClick={handleResetModeSelection}
-            >
-              다른 모드로 다시 선택하기
-            </button>
-          </div>
-        )} */}
         <div className="welcome-section">
           <h1 className="main-title">느린 키오스크</h1>
           <p className="subtitle">음성으로 편리하게 주문하세요</p>

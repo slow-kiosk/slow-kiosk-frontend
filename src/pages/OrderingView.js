@@ -89,6 +89,40 @@ const OrderingView = () => {
     navigate('/checkout');
   }, [orderItems, addChatMessage, navigate]);
 
+  const handleServerResponse = useCallback((response) => {
+    setIsProcessing(false);
+
+    // 1. AI 음성 안내 (가장 먼저 실행)
+    if (response.spokenResponse || response.message) {
+      const message = { 
+        role: 'assistant', 
+        content: response.spokenResponse || response.message 
+      };
+      addChatMessage(message);
+      
+      const isSlow = response.slowMode || false;
+      speechService.speak(response.spokenResponse || response.message, { slowMode: isSlow });
+    }
+
+    // 2. 장바구니 동기화 (주문 완료 상태라도 데이터가 있으면 반영!)
+    // 백엔드에서 lastCartState를 보내주므로, 이걸로 업데이트해야 영수증이 나옵니다.
+    if (response.updatedCart) {
+      syncCart(response.updatedCart);
+    }
+
+    // 3. 화면 전환 (TTS를 들을 시간을 주고 이동)
+    if (response.newState === 'ORDER_COMPLETE') {
+      console.log("주문이 완료되었습니다. 4초 후 결제 화면으로 이동합니다.");
+      
+      setTimeout(() => {
+        setListening(false); // 마이크 끄기
+        navigate('/checkout'); // 결제 화면 이동
+      }, 4000); // 4초 딜레이
+    } else if (response.newState === 'PAYMENT') {
+        setTimeout(() => navigate('/checkout'), 2000);
+    }
+  }, [addChatMessage, navigate, syncCart, setListening]);
+
   const handleVoiceInput = useCallback(async (text) => {
     if (isProcessing || !text.trim()) return;
     
@@ -147,34 +181,13 @@ const OrderingView = () => {
           speechService.speak(confirmMessage.content);
         }, confirmMessage.content.length * 30 + 200);
       } else {
-        // 챗봇 응답 처리
-        if (response.message) {
-          const assistantMessage = {
-            role: 'assistant',
-            content: response.message,
-            suggestions: response.suggestions || [],
-            isTypingText: true // iMessage 스타일 타이핑 애니메이션
-          };
-          addChatMessage(assistantMessage);
-          
-          // 타이핑 애니메이션이 완료된 후 음성 출력
-          setTimeout(() => {
-            speechService.speak(response.message);
-          }, response.message.length * 30 + 200);
-        }
-        
-        // 액션 처리
-        if (response.action === 'proceed_to_payment') {
-          setTimeout(() => {
-            navigate('/checkout');
-          }, 500);
-        }
+        // 챗봇 응답 처리 - handleServerResponse 사용
+        handleServerResponse(response);
       }
     } catch (error) {
-    } finally {
       setIsProcessing(false);
     }
-  }, [isProcessing, orderItems, menus, addItem, addChatMessage, navigate, handleOrderList, handleCompleteOrder]);
+  }, [isProcessing, orderItems, menus, addItem, addChatMessage, navigate, handleOrderList, handleCompleteOrder, handleServerResponse]);
 
   // 메뉴 데이터 가져오기
   useEffect(() => {

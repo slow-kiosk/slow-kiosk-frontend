@@ -62,6 +62,9 @@ class ChatbotService {
       message: responseDto.spokenResponse || '응답이 없습니다.',
       suggestions: [], // 필요 시 서버 uiData에서 추출 가능
       action: this.mapStateToAction(responseDto.newState),
+      newState: responseDto.newState, // 직접 접근 가능하도록 추가
+      updatedCart: responseDto.updatedCart, // 직접 접근 가능하도록 추가
+      slowMode: responseDto.slowMode || false, // slowMode 추가
       metadata: {
         nextScene: responseDto.newState,
         cart: responseDto.updatedCart

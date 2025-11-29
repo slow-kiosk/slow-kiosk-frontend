@@ -23,6 +23,11 @@ class SpeechService {
     this.lastTTSEndTime = 0; // 마지막 TTS 종료 시간
     this.TTS_FILTER_DURATION = 2000; // TTS 종료 후 필터링 지속 시간 (ms)
 
+    // 침묵 시간 지연 처리 관련 변수
+    this.pendingFinalResult = null; // 대기 중인 최종 결과
+    this.finalResultTimeout = null; // 최종 결과 처리 타이머
+    this.SILENCE_DELAY = 500; // 침묵 시간 추가 지연 (ms) - 0.5초
+
     // 목소리 로드 리스너
     if (this.synthesis && this.synthesis.onvoiceschanged !== undefined) {
       this.synthesis.onvoiceschanged = () => {
@@ -83,37 +88,74 @@ class SpeechService {
         // 현재 전사본 업데이트
         this.currentTranscript = interimTranscript || finalTranscript;
         
-        // 최종 텍스트가 있는 경우, TTS 출력과 유사한지 확인
-        if (finalTranscript) {
-          // TTS 출력 필터링: 최근 TTS 출력과 유사한 텍스트는 무시
-          if (this.isSimilarToRecentTTS(finalTranscript)) {
-            console.log('[음성 인식 필터링] TTS 출력과 유사한 텍스트를 무시합니다:', finalTranscript);
-            return; // TTS 출력으로 인식된 텍스트는 무시
+        // 중간 결과(interim)가 있으면, 대기 중인 최종 결과 처리를 취소
+        // (사용자가 계속 말하고 있다는 의미)
+        if (interimTranscript) {
+          if (this.finalResultTimeout) {
+            clearTimeout(this.finalResultTimeout);
+            this.finalResultTimeout = null;
+            this.pendingFinalResult = null;
+            console.log('[음성 인식] 중간 결과 감지 - 최종 결과 처리 취소');
           }
           
-          // TTS 종료 후 일정 시간 내의 인식 결과도 필터링
-          const timeSinceLastTTS = Date.now() - this.lastTTSEndTime;
-          if (timeSinceLastTTS < this.TTS_FILTER_DURATION) {
-            console.log('[음성 인식 필터링] TTS 종료 직후 인식 결과를 무시합니다:', finalTranscript);
-            return;
-          }
-          
-          // 최종 텍스트가 있고 백엔드 전송이 활성화된 경우 백엔드로 전송
-          if (this.sendToBackend && this.apiService) {
-            this.apiService.sendSTTText(finalTranscript, {
-              source: 'web-speech-api',
-              lang: 'ko-KR'
-            }).catch(error => {
-              console.error('백엔드 전송 실패:', error);
+          // 중간 결과는 즉시 콜백 호출
+          if (this.onResultCallback) {
+            this.onResultCallback({
+              interim: interimTranscript,
+              final: ''
             });
           }
         }
         
-        if (this.onResultCallback) {
-          this.onResultCallback({
-            interim: interimTranscript,
-            final: finalTranscript
-          });
+        // 최종 텍스트가 있는 경우, 침묵 시간 지연 후 처리
+        if (finalTranscript) {
+          // 기존 대기 중인 최종 결과가 있으면 취소
+          if (this.finalResultTimeout) {
+            clearTimeout(this.finalResultTimeout);
+          }
+          
+          // 최종 결과를 대기 목록에 저장
+          this.pendingFinalResult = finalTranscript;
+          
+          // 침묵 시간 추가 지연 후 처리
+          this.finalResultTimeout = setTimeout(() => {
+            const resultToProcess = this.pendingFinalResult;
+            this.pendingFinalResult = null;
+            this.finalResultTimeout = null;
+            
+            if (!resultToProcess) return;
+            
+            // TTS 출력 필터링: 최근 TTS 출력과 유사한 텍스트는 무시
+            if (this.isSimilarToRecentTTS(resultToProcess)) {
+              console.log('[음성 인식 필터링] TTS 출력과 유사한 텍스트를 무시합니다:', resultToProcess);
+              return; // TTS 출력으로 인식된 텍스트는 무시
+            }
+            
+            // TTS 종료 후 일정 시간 내의 인식 결과도 필터링
+            const timeSinceLastTTS = Date.now() - this.lastTTSEndTime;
+            if (timeSinceLastTTS < this.TTS_FILTER_DURATION) {
+              console.log('[음성 인식 필터링] TTS 종료 직후 인식 결과를 무시합니다:', resultToProcess);
+              return;
+            }
+            
+            // 최종 텍스트가 있고 백엔드 전송이 활성화된 경우 백엔드로 전송
+            if (this.sendToBackend && this.apiService) {
+              this.apiService.sendSTTText(resultToProcess, {
+                source: 'web-speech-api',
+                lang: 'ko-KR'
+              }).catch(error => {
+                console.error('백엔드 전송 실패:', error);
+              });
+            }
+            
+            // 최종 결과 콜백 호출
+            if (this.onResultCallback) {
+              this.onResultCallback({
+                interim: '',
+                final: resultToProcess
+              });
+            }
+          }, this.SILENCE_DELAY);
         }
       };
       
@@ -232,6 +274,12 @@ class SpeechService {
       this.recognition.stop();
       this.isListening = false;
     }
+    // 대기 중인 최종 결과 처리 취소
+    if (this.finalResultTimeout) {
+      clearTimeout(this.finalResultTimeout);
+      this.finalResultTimeout = null;
+      this.pendingFinalResult = null;
+    }
   }
 
   pauseRecognitionForTTS() {
@@ -241,6 +289,13 @@ class SpeechService {
 
     this.shouldResumeAfterTTS = this.shouldContinueListening;
     this.isPausedForTTS = true;
+
+    // 대기 중인 최종 결과 처리 취소
+    if (this.finalResultTimeout) {
+      clearTimeout(this.finalResultTimeout);
+      this.finalResultTimeout = null;
+      this.pendingFinalResult = null;
+    }
 
     if (this.isListening) {
       try {
@@ -452,7 +507,16 @@ class SpeechService {
       '바코드', '캡쳐', '캡처',
       '기프티콘', '쿠폰', '할인',
       '결제', '완료', '좋아',
-      '주문 내역', '주문내역', '주문 완료', '주문완료'
+      '주문 내역', '주문내역', '주문 완료', '주문완료',
+      // 메뉴 항목
+      '치즈버거', '더블 치즈버거', '더블치즈버거', '더블 치즈 버거',
+      '불고기버거', '불고기 버거',
+      '와퍼', '스테디 와퍼', '스테디와퍼',
+      '콜라', '콜라 제로', '콜라제로',
+      '프렌치프라이', '프렌치 프라이', '감자튀김', '감자 튀김',
+      '모짜렐라 스틱', '모짜렐라스틱', '치즈스틱',
+      '샐러드', '애플파이', '애플 파이',
+      '버거', '햄버거'
     ];
     
     // 중요한 키워드가 포함되어 있으면 필터링하지 않음
