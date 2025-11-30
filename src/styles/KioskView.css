@@ -446,6 +446,15 @@
   color: #ffffff !important;
 }
 
+:root.high-contrast .main-title {
+  color: #ffffff !important;
+  text-shadow: none !important;
+}
+
+:root.high-contrast .subtitle {
+  color: #ffffff !important;
+}
+
 /* 타이핑 텍스트 컨테이너 */
 .typing-text-container {
   width: 100%;
