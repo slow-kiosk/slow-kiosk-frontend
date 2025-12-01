@@ -1,18 +1,26 @@
 // API 베이스 URL 설정
 // 환경 변수 또는 기본값 사용
 const getApiBaseUrl = () => {
-  // 환경 변수가 있으면 사용, 없으면 개발 환경에서는 localhost:8080, 프로덕션에서는 3.34.58.161
+  // 환경 변수가 있으면 사용 (https를 http로 강제 변환)
   if (process.env.REACT_APP_API_BASE_URL) {
-    return process.env.REACT_APP_API_BASE_URL;
+    const url = process.env.REACT_APP_API_BASE_URL;
+    // https를 http로 변환
+    const httpUrl = url.replace(/^https:/, 'http:');
+    console.log('[API] 환경 변수에서 API URL 사용:', httpUrl);
+    return httpUrl;
   }
   
   // 개발 환경 체크 (localhost에서 실행 중인지)
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return 'http://localhost:8080';
+    const url = 'http://localhost:8080';
+    console.log('[API] 개발 환경 - localhost 사용:', url);
+    return url;
   }
   
-  // 프로덕션 환경에서는 3.34.58.161 사용
-  return 'http://3.34.58.161';
+  // 프로덕션 환경에서는 3.34.58.161 사용 (http로 고정)
+  const url = 'http://3.34.58.161';
+  console.log('[API] 프로덕션 환경 - 배포 서버 사용:', url);
+  return url;
 };
 
 // WebSocket URL 생성
