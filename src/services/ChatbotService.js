@@ -5,7 +5,7 @@ import { getWebSocketUrl } from './Api';
 // 맞춤법 틀리거나 띄어쓰기 혹은 내용 포함 시 잘 주문이 이루어지도록 혹은 메뉴가 맞는지 확인하는 기능 추가 필요
 class ChatbotService {
   constructor() {
-    // 백엔드 WebSocket 엔드포인트 (Spring Boot 포트 8080 또는 3.34.58.161)
+    // 백엔드 WebSocket 엔드포인트 (로컬 개발: localhost:8080, 프로덕션: slow-kiosk-team.duckdns.org)
     this.socketUrl = getWebSocketUrl('/ws-kiosk');
     this.client = null;
     this.connected = false;

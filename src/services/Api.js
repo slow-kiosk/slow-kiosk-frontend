@@ -1,13 +1,11 @@
 // API 베이스 URL 설정
 // 환경 변수 또는 기본값 사용
 const getApiBaseUrl = () => {
-  // 환경 변수가 있으면 사용 (https를 http로 강제 변환)
+  // 환경 변수가 있으면 사용
   if (process.env.REACT_APP_API_BASE_URL) {
     const url = process.env.REACT_APP_API_BASE_URL;
-    // https를 http로 변환
-    const httpUrl = url.replace(/^https:/, 'http:');
-    console.log('[API] 환경 변수에서 API URL 사용:', httpUrl);
-    return httpUrl;
+    console.log('[API] 환경 변수에서 API URL 사용:', url);
+    return url;
   }
   
   // 개발 환경 체크 (localhost에서 실행 중인지)
@@ -17,8 +15,8 @@ const getApiBaseUrl = () => {
     return url;
   }
   
-  // 프로덕션 환경에서는 3.34.58.161 사용 (http로 고정)
-  const url = 'http://3.34.58.161';
+  // 프로덕션 환경에서는 slow-kiosk-team.duckdns.org 사용
+  const url = 'https://slow-kiosk-team.duckdns.org';
   console.log('[API] 프로덕션 환경 - 배포 서버 사용:', url);
   return url;
 };
@@ -26,7 +24,14 @@ const getApiBaseUrl = () => {
 // WebSocket URL 생성
 export const getWebSocketUrl = (endpoint = '/ws-kiosk') => {
   const baseUrl = getApiBaseUrl();
-  return `${baseUrl}${endpoint}`;
+  // https를 사용하는 경우 wss로 변환, http를 사용하는 경우 ws로 변환
+  if (baseUrl.startsWith('https://')) {
+    const wsBaseUrl = baseUrl.replace(/^https:/, 'wss:');
+    return `${wsBaseUrl}${endpoint}`;
+  } else {
+    const wsBaseUrl = baseUrl.replace(/^http:/, 'ws:');
+    return `${wsBaseUrl}${endpoint}`;
+  }
 };
 
 // REST API URL 생성

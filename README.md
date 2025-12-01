@@ -7,7 +7,6 @@
 [![Vercel](https://img.shields.io/badge/Vercel-Deployed-black?style=for-the-badge&logo=vercel)](https://slow-kiosk-frontend.vercel.app/)
 [![React](https://img.shields.io/badge/React-18+-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
 
-
 </div>
 
 <br/>
@@ -30,6 +29,7 @@
 <br/>
 
 ## 배포 주소
+
 **Vercel 배포 링크:** [https://slow-kiosk-frontend.vercel.app/](https://slow-kiosk-frontend.vercel.app/)
 
 ## ⚠️ 시작하기 전에
@@ -165,6 +165,14 @@ yarn start
              │
              └─[사용자 맞춤 버튼]────► GlobalView
                                          │
+                                         ├─[글자 크기/라인 높이 조절]────► 실시간 UI 반영
+                                         │
+                                         ├─[고대비/색약 모드 토글]─────► 접근성 스타일 적용
+                                         │
+                                         ├─[음성 안내/진동 피드백 토글]─► 보조 기능 제어
+                                         │
+                                         └─[환경 설정 저장]────────────► 로컬 상태 유지
+                                         │
                                          └─[돌아가기]────► KioskView
 
 ┌─────────────────────────────────────────────────────────────────┐
@@ -227,17 +235,15 @@ yarn start
 
 ### Key Libraries
 
-| Library | Version | Description |
-|---------|---------|-------------|
-| **React** | 18+ | UI 라이브러리 |
-| **@stomp/stompjs** | Latest | WebSocket STOMP 프로토콜 클라이언트 |
-| **sockjs-client** | Latest | SockJS 클라이언트 |
-| **Web Speech API** | Native | 음성 인식 기능 |
+| Library            | Version | Description                         |
+| ------------------ | ------- | ----------------------------------- |
+| **React**          | 18+     | UI 라이브러리                       |
+| **@stomp/stompjs** | Latest  | WebSocket STOMP 프로토콜 클라이언트 |
+| **sockjs-client**  | Latest  | SockJS 클라이언트                   |
+| **Web Speech API** | Native  | 음성 인식 기능                      |
 
 <br/>
 
 ---
-
-
 
 </div>
