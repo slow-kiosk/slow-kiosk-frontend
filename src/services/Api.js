@@ -44,11 +44,107 @@ export const getApiUrl = (endpoint) => {
 // API 베이스 URL 직접 접근
 export const API_BASE_URL = getApiBaseUrl();
 
+/**
+ * 백엔드 서버 연결 상태 테스트
+ * @returns {Promise<{success: boolean, status: number, message: string, url: string}>}
+ */
+export const testBackendConnection = async () => {
+  const baseUrl = getApiBaseUrl();
+  const testUrl = getApiUrl('/api/menu'); // 메뉴 API로 연결 테스트
+  
+  console.log('='.repeat(60));
+  console.log('[백엔드 연결 테스트] 시작');
+  console.log('[백엔드 연결 테스트] 서버 주소:', baseUrl);
+  console.log('[백엔드 연결 테스트] 테스트 URL:', testUrl);
+  console.log('[백엔드 연결 테스트] 요청 시간:', new Date().toISOString());
+  
+  const startTime = Date.now();
+  
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10초 타임아웃
+    
+    const response = await fetch(testUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      signal: controller.signal,
+    });
+    
+    clearTimeout(timeoutId);
+    const duration = Date.now() - startTime;
+    
+    console.log('[백엔드 연결 테스트] 응답 상태:', response.status, response.statusText);
+    console.log('[백엔드 연결 테스트] 응답 시간:', duration + 'ms');
+    console.log('[백엔드 연결 테스트] 응답 헤더:', Object.fromEntries(response.headers.entries()));
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log('[백엔드 연결 테스트] 연결 성공!');
+      console.log('[백엔드 연결 테스트] 응답 데이터 타입:', Array.isArray(data) ? `배열 (${data.length}개)` : typeof data);
+      console.log('='.repeat(60));
+      
+      return {
+        success: true,
+        status: response.status,
+        message: '백엔드 서버 연결 성공',
+        url: testUrl,
+        duration: duration,
+        dataLength: Array.isArray(data) ? data.length : null
+      };
+    } else {
+      const errorText = await response.text();
+      console.error('[백엔드 연결 테스트] 연결 실패 - HTTP 상태:', response.status);
+      console.error('[백엔드 연결 테스트] 에러 응답:', errorText);
+      console.log('='.repeat(60));
+      
+      return {
+        success: false,
+        status: response.status,
+        message: `HTTP ${response.status}: ${response.statusText}`,
+        url: testUrl,
+        duration: duration,
+        error: errorText
+      };
+    }
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    
+    console.error('[백엔드 연결 테스트] 연결 실패 - 네트워크 에러');
+    console.error('[백엔드 연결 테스트] 에러 타입:', error.name);
+    console.error('[백엔드 연결 테스트] 에러 메시지:', error.message);
+    console.error('[백엔드 연결 테스트] 에러 상세:', error);
+    
+    if (error.name === 'AbortError') {
+      console.error('[백엔드 연결 테스트] ⏱요청 타임아웃 (10초 초과)');
+    } else if (error.message.includes('CORS')) {
+      console.error('[백엔드 연결 테스트] CORS 정책 위반 - 서버에서 CORS 설정 확인 필요');
+    } else if (error.message.includes('Failed to fetch')) {
+      console.error('[백엔드 연결 테스트] 네트워크 연결 실패 - 서버가 응답하지 않거나 도메인을 찾을 수 없음');
+    }
+    
+    console.log('='.repeat(60));
+    
+    return {
+      success: false,
+      status: 0,
+      message: error.message || '네트워크 에러',
+      url: testUrl,
+      duration: duration,
+      error: error.name,
+      errorDetails: error.message
+    };
+  }
+};
+
 const apiService = {
   getApiBaseUrl,
   getWebSocketUrl,
   getApiUrl,
-  API_BASE_URL
+  API_BASE_URL,
+  testBackendConnection
 };
 
 export default apiService;

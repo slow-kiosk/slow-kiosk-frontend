@@ -22,12 +22,22 @@ class ChatbotService {
   }
 
   connect() {
+    console.log('='.repeat(60));
+    console.log('[WebSocket] 연결 시도 시작');
+    console.log('[WebSocket] 서버 URL:', this.socketUrl);
+    console.log('[WebSocket] 연결 시간:', new Date().toISOString());
+    
     this.client = new Client({
       // WebSocketConfig.java에 설정된 SockJS 엔드포인트 연결
-      webSocketFactory: () => new SockJS(this.socketUrl),
+      webSocketFactory: () => {
+        console.log('[WebSocket] SockJS 생성 중...');
+        return new SockJS(this.socketUrl);
+      },
       reconnectDelay: 5000, // 연결 끊기면 5초 뒤 재연결 시도
       onConnect: () => {
-        console.log('키오스크 WebSocket 연결 성공');
+        console.log('[WebSocket] ✅ 연결 성공!');
+        console.log('[WebSocket] 연결 시간:', new Date().toISOString());
+        console.log('='.repeat(60));
         this.connected = true;
 
         // 1. 서버 응답 구독 (/sub/kiosk/response)
@@ -40,11 +50,25 @@ class ChatbotService {
         });
       },
       onStompError: (frame) => {
-        console.error('Broker reported error: ' + frame.headers['message']);
-        console.error('Additional details: ' + frame.body);
+        console.error('[WebSocket] ❌ STOMP 에러 발생');
+        console.error('[WebSocket] 에러 메시지:', frame.headers['message']);
+        console.error('[WebSocket] 에러 상세:', frame.body);
+        console.error('[WebSocket] 에러 헤더:', frame.headers);
+        console.log('='.repeat(60));
+      },
+      onDisconnect: () => {
+        console.warn('[WebSocket] ⚠️ 연결 끊김');
+        console.warn('[WebSocket] 끊김 시간:', new Date().toISOString());
+        this.connected = false;
+      },
+      onWebSocketError: (event) => {
+        console.error('[WebSocket] ❌ WebSocket 에러 발생');
+        console.error('[WebSocket] 에러 이벤트:', event);
+        console.log('='.repeat(60));
       },
     });
 
+    console.log('[WebSocket] 클라이언트 활성화 중...');
     this.client.activate();
   }
 

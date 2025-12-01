@@ -1,0 +1,239 @@
+.resolution-warning-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.resolution-warning-panel {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 40px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.resolution-warning-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.resolution-warning-icon {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.resolution-warning-panel h2 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.resolution-warning-content {
+  margin-bottom: 32px;
+}
+
+.resolution-warning-message {
+  font-size: 20px;
+  color: #374151;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.resolution-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+}
+
+.resolution-current,
+.resolution-target {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #ffffff;
+  border-radius: 8px;
+}
+
+.resolution-label {
+  font-size: 18px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.resolution-value {
+  font-size: 20px;
+  color: #1f2937;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+}
+
+.resolution-target .resolution-value {
+  color: #059669;
+}
+
+.resolution-instructions {
+  background: #fef3c7;
+  border: 2px solid #fbbf24;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.resolution-instructions h3 {
+  font-size: 22px;
+  color: #92400e;
+  margin: 0 0 16px 0;
+  font-weight: 700;
+}
+
+.resolution-instructions ol {
+  margin: 0;
+  padding-left: 24px;
+  color: #78350f;
+  font-size: 18px;
+  line-height: 1.8;
+}
+
+.resolution-instructions li {
+  margin-bottom: 16px;
+}
+
+.resolution-instructions ul {
+  margin: 8px 0 0 0;
+  padding-left: 24px;
+  list-style-type: disc;
+}
+
+.resolution-instructions kbd {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  color: #1f2937;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.code-block {
+  background: #1f2937;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 12px 0;
+  overflow-x: auto;
+}
+
+.code-block code {
+  color: #10b981;
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.resolution-warning-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+  padding-top: 24px;
+  border-top: 2px solid #e5e7eb;
+}
+
+.resolution-help-button,
+.resolution-close-button {
+  padding: 14px 28px;
+  border-radius: 12px;
+  border: none;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.resolution-help-button {
+  background: linear-gradient(120deg, #5b6def, #a479ff);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(87, 108, 239, 0.3);
+}
+
+.resolution-help-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(87, 108, 239, 0.4);
+}
+
+.resolution-help-button:active {
+  transform: translateY(0);
+}
+
+.resolution-close-button {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.resolution-close-button:hover {
+  background: #d1d5db;
+}
+
+.resolution-close-button:active {
+  background: #9ca3af;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .resolution-warning-panel {
+    padding: 24px;
+    max-width: 100%;
+  }
+
+  .resolution-warning-panel h2 {
+    font-size: 24px;
+  }
+
+  .resolution-warning-message {
+    font-size: 18px;
+  }
+
+  .resolution-instructions {
+    padding: 16px;
+  }
+
+  .resolution-instructions h3 {
+    font-size: 20px;
+  }
+
+  .resolution-instructions ol {
+    font-size: 16px;
+  }
+
+  .resolution-warning-actions {
+    flex-direction: column;
+  }
+
+  .resolution-help-button,
+  .resolution-close-button {
+    width: 100%;
+  }
+}
+
