@@ -24,14 +24,10 @@ const getApiBaseUrl = () => {
 // WebSocket URL 생성
 export const getWebSocketUrl = (endpoint = '/ws-kiosk') => {
   const baseUrl = getApiBaseUrl();
-  // https를 사용하는 경우 wss로 변환, http를 사용하는 경우 ws로 변환
-  if (baseUrl.startsWith('https://')) {
-    const wsBaseUrl = baseUrl.replace(/^https:/, 'wss:');
-    return `${wsBaseUrl}${endpoint}`;
-  } else {
-    const wsBaseUrl = baseUrl.replace(/^http:/, 'ws:');
-    return `${wsBaseUrl}${endpoint}`;
-  }
+  
+  // [중요] SockJS는 http/https 프로토콜을 사용해야 합니다.
+  // 내부적으로 알아서 ws/wss로 업그레이드 진행하기에 wss를 따로 변경할 필요가 없음
+  return `${baseUrl}${endpoint}`;
 };
 
 // REST API URL 생성
