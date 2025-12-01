@@ -1,6 +1,8 @@
+import { getApiUrl } from '../services/Api';
+
 export async function fetchMenus() {
   try {
-    const response = await fetch('http://localhost:8080/api/menu'); // 백엔드 엔드포인트
+    const response = await fetch(getApiUrl('/api/menu')); // 백엔드 엔드포인트
     if (!response.ok) {
       throw new Error('메뉴를 불러오는 데 실패했습니다.');
     }
