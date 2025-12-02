@@ -8,8 +8,17 @@ const TOLERANCE = 10; // 10px 허용 오차
 const ResolutionChecker = () => {
   const [showWarning, setShowWarning] = useState(false);
   const [currentSize, setCurrentSize] = useState({ width: 0, height: 0 });
+  const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
+    // 사용자가 이미 "나중에 알림"을 눌러 창을 닫았는지 확인
+    const dismissedFlag = localStorage.getItem('resolutionWarningDismissed');
+    if (dismissedFlag === 'true') {
+      setIsDismissed(true);
+      setShowWarning(false);
+      return; // 더 이상 경고를 띄우지 않음
+    }
+
     const checkResolution = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
@@ -39,6 +48,14 @@ const ResolutionChecker = () => {
   }, []);
 
   const handleClose = () => {
+    // "나중에 알림" 버튼 클릭 시, 이후부터는 창이 다시 뜨지 않도록 플래그 저장
+    try {
+      localStorage.setItem('resolutionWarningDismissed', 'true');
+      setIsDismissed(true);
+    } catch (e) {
+      // localStorage 사용이 불가한 환경에서는 그냥 한 번만 닫힘
+      console.error('Failed to access localStorage for resolution warning:', e);
+    }
     setShowWarning(false);
   };
 
